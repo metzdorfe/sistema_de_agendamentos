@@ -1,0 +1,80 @@
+<UserControl x:Class="EspacoFestas.Views.ServicosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:EspacoFestas.Controls">
+    <Grid Margin="32,28,32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button ctl:Estilo.Icone="{StaticResource IconeCatalogo}" Content="Gerar catálogo" Margin="0,0,8,0"
+                        ToolTip="Catálogo em PDF de todos os serviços ativos" Click="BtnCatalogo_Click"/>
+                <Button Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                        Content="Novo Serviço" Click="BtnNovo_Click"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="Serviços" Style="{StaticResource TextoTituloTela}"/>
+                <TextBlock Text="Os espaços oferecidos, com faixas de preço e adicionais." Style="{StaticResource TextoSubtitulo}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <DockPanel Grid.Row="1" Margin="0,24,0,16">
+            <CheckBox x:Name="ChkInativos" DockPanel.Dock="Right" Style="{StaticResource Interruptor}" Content="Mostrar inativos"
+                      VerticalAlignment="Center" Checked="Filtro_Changed" Unchecked="Filtro_Changed"/>
+            <TextBox x:Name="TxtBusca" Width="360" HorizontalAlignment="Left" ctl:Estilo.Icone="{StaticResource IconeBuscar}"
+                     Tag="Buscar serviço..." TextChanged="Filtro_Changed"/>
+        </DockPanel>
+
+        <Border Grid.Row="2" Style="{StaticResource Cartao}" Padding="8,4">
+            <Grid>
+                <DataGrid x:Name="Grade" PreviewMouseLeftButtonUp="Grade_PreviewMouseLeftButtonUp">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="2*" ElementStyle="{StaticResource CelulaNegrito}"/>
+                        <DataGridTextColumn Header="A partir de" Binding="{Binding APartirDe}" Width="140"
+                                            ElementStyle="{StaticResource CelulaDireita}" HeaderStyle="{StaticResource CabecalhoDireita}"/>
+                        <DataGridTextColumn Header="Faixas" Binding="{Binding Faixas}" Width="100"
+                                            ElementStyle="{StaticResource CelulaDireita}" HeaderStyle="{StaticResource CabecalhoDireita}"/>
+                        <DataGridTextColumn Header="Adicionais" Binding="{Binding Adicionais}" Width="110"
+                                            ElementStyle="{StaticResource CelulaDireita}" HeaderStyle="{StaticResource CabecalhoDireita}"/>
+                        <DataGridTemplateColumn Header="Status" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="SeloStatus" Style="{StaticResource SeloSucesso}">
+                                        <TextBlock x:Name="TxtStatus" Text="Ativo"/>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Ativo}" Value="False">
+                                            <Setter TargetName="SeloStatus" Property="Style" Value="{StaticResource Selo}"/>
+                                            <Setter TargetName="TxtStatus" Property="Text" Value="Inativo"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="" Width="48">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ctl:Icone Dados="{StaticResource IconeProximo}" Foreground="{DynamicResource CorTextoSecundario}" Width="16" Height="16"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel x:Name="Vazio" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                    <ctl:Icone Dados="{StaticResource IconeServicos}" Foreground="{DynamicResource CorTextoSecundario}" Width="40" Height="40"/>
+                    <TextBlock x:Name="TxtVazio" Text="Nenhum serviço ainda" Style="{StaticResource TextoTituloSecao}"
+                               HorizontalAlignment="Center" Margin="0,16,0,4"/>
+                    <TextBlock x:Name="TxtVazioAjuda" Text="Cadastre o espaço (ex.: Salão Principal) com as faixas de preço e os adicionais."
+                               Style="{StaticResource TextoAuxiliar}" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                    <Button x:Name="BtnVazio" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                            Content="Cadastrar serviço" HorizontalAlignment="Center" Click="BtnNovo_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

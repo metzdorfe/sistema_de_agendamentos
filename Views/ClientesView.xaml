@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="EspacoFestas.Views.ClientesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:EspacoFestas.Controls">
+    <Grid Margin="32,28,32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                    Content="Novo Cliente" VerticalAlignment="Top" Click="BtnNovo_Click"/>
+            <StackPanel>
+                <TextBlock Text="Clientes" Style="{StaticResource TextoTituloTela}"/>
+                <TextBlock Text="Cadastre e gerencie seus clientes." Style="{StaticResource TextoSubtitulo}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <DockPanel Grid.Row="1" Margin="0,24,0,16">
+            <CheckBox x:Name="ChkInativos" DockPanel.Dock="Right" Style="{StaticResource Interruptor}" Content="Mostrar inativos"
+                      VerticalAlignment="Center" Checked="ChkInativos_Changed" Unchecked="ChkInativos_Changed"/>
+            <TextBox x:Name="TxtBusca" Width="360" HorizontalAlignment="Left" ctl:Estilo.Icone="{StaticResource IconeBuscar}"
+                     Tag="Buscar por nome, telefone ou CPF/CNPJ..." TextChanged="TxtBusca_TextChanged"/>
+        </DockPanel>
+
+        <Border Grid.Row="2" Style="{StaticResource Cartao}" Padding="8,4">
+            <Grid>
+                <DataGrid x:Name="Grade" MouseDoubleClick="Grade_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="2*" ElementStyle="{StaticResource CelulaNegrito}"/>
+                        <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}" Width="170"/>
+                        <DataGridTemplateColumn Header="CPF/CNPJ" Width="230">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!-- Vazio (NULL) mostra o aviso só na tela; esse texto nunca é gravado -->
+                                    <TextBlock x:Name="Texto" Text="{Binding CpfCnpj}" Style="{StaticResource CelulaTexto}"/>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding CpfCnpj}" Value="{x:Null}">
+                                            <Setter TargetName="Texto" Property="Text" Value="CPF/CNPJ não informado"/>
+                                            <Setter TargetName="Texto" Property="FontStyle" Value="Italic"/>
+                                            <Setter TargetName="Texto" Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="SeloInativo" Style="{StaticResource Selo}" Visibility="Collapsed">
+                                        <TextBlock Text="Inativo"/>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Ativo}" Value="False">
+                                            <Setter TargetName="SeloInativo" Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="" Width="56">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeMenu}"
+                                            ToolTip="Ações" Click="BtnAcoes_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Estado vazio -->
+                <StackPanel x:Name="Vazio" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                    <ctl:Icone Dados="{StaticResource IconeClientes}" Foreground="{DynamicResource CorTextoSecundario}" Width="40" Height="40"/>
+                    <TextBlock x:Name="TxtVazio" Text="Nenhum cliente ainda" Style="{StaticResource TextoTituloSecao}"
+                               HorizontalAlignment="Center" Margin="0,16,0,16"/>
+                    <Button x:Name="BtnVazio" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                            Content="Cadastrar cliente" HorizontalAlignment="Center" Click="BtnNovo_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

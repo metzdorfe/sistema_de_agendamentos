@@ -1,0 +1,88 @@
+<Window x:Class="EspacoFestas.Views.RelatorioFiltrosWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:EspacoFestas.Controls"
+        Title="Relatório" Width="560" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        FontFamily="{StaticResource FonteInter}" FontSize="14" Foreground="{DynamicResource CorTexto}"
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <!-- Popup de filtros dos relatórios, no mesmo visual do popup de agendamento (fundo escurece pela MainWindow.MostrarModal).
+         Genérico: mostra só os filtros que o relatório declara (IRelatorio.Filtros). -->
+    <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="1" CornerRadius="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Cabeçalho -->
+            <Border BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1" Background="Transparent"
+                    MouseLeftButtonDown="Cabecalho_MouseLeftButtonDown">
+                <DockPanel Margin="24,20,16,16">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeFechar}"
+                            VerticalAlignment="Top" ToolTip="Fechar (Esc)" IsCancel="True" Click="BtnFechar_Click"/>
+                    <StackPanel>
+                        <TextBlock x:Name="TxtTitulo" Style="{StaticResource TextoTituloSecao}" FontSize="20"/>
+                        <TextBlock x:Name="TxtDescricao" Style="{StaticResource TextoAuxiliar}" TextWrapping="Wrap" Margin="0,4,8,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Filtros -->
+            <StackPanel Grid.Row="1" Margin="24,20,24,8">
+                <Grid x:Name="PainelPeriodo" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="De *" Style="{StaticResource TextoRotulo}"/>
+                        <Grid x:Name="CaixaDe">
+                            <TextBox x:Name="TxtDe" Tag="dd/mm/aaaa" ctl:Mascara.Tipo="Data" Padding="12,0,36,0" TextChanged="Filtro_Changed"/>
+                            <Button Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeAgenda}" HorizontalAlignment="Right"
+                                    Margin="0,0,4,0" Focusable="False" ToolTip="Escolher no calendário" Click="BtnCalendarioDe_Click"/>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Até *" Style="{StaticResource TextoRotulo}"/>
+                        <Grid x:Name="CaixaAte">
+                            <TextBox x:Name="TxtAte" Tag="dd/mm/aaaa" ctl:Mascara.Tipo="Data" Padding="12,0,36,0" TextChanged="Filtro_Changed"/>
+                            <Button Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeAgenda}" HorizontalAlignment="Right"
+                                    Margin="0,0,4,0" Focusable="False" ToolTip="Escolher no calendário" Click="BtnCalendarioAte_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel x:Name="PainelCliente" Margin="0,0,0,16">
+                    <TextBlock Text="Cliente" Style="{StaticResource TextoRotulo}"/>
+                    <ComboBox x:Name="CmbCliente" MaxDropDownHeight="280" SelectionChanged="Filtro_Changed"/>
+                </StackPanel>
+
+                <StackPanel x:Name="PainelStatus" Margin="0,0,0,16">
+                    <TextBlock Text="Status" Style="{StaticResource TextoRotulo}"/>
+                    <ComboBox x:Name="CmbStatus" SelectionChanged="Filtro_Changed"/>
+                </StackPanel>
+
+                <StackPanel x:Name="PainelServico" Margin="0,0,0,16">
+                    <TextBlock Text="Serviço" Style="{StaticResource TextoRotulo}"/>
+                    <ComboBox x:Name="CmbServico" MaxDropDownHeight="280" SelectionChanged="Filtro_Changed"/>
+                </StackPanel>
+
+                <TextBlock x:Name="TxtMensagem" Style="{StaticResource TextoErro}" FontSize="13" TextWrapping="Wrap" Visibility="Collapsed"/>
+            </StackPanel>
+
+            <!-- Rodapé: formato -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,1,0,0" Padding="24,16">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancelar" Style="{StaticResource BotaoFantasma}" Margin="0,0,8,0" Click="BtnFechar_Click"/>
+                    <Button x:Name="BtnXlsx" Content="Gerar Excel (XLSX)" Margin="0,0,8,0" Click="BtnXlsx_Click"/>
+                    <Button x:Name="BtnPdf" Content="Gerar PDF" Style="{StaticResource BotaoPrincipal}" Click="BtnPdf_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

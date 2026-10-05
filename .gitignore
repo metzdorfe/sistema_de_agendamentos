@@ -1,0 +1,45 @@
+# ============================================================================
+# Fest Agenda — arquivos que não vão para o Git
+# ============================================================================
+
+# Build (Visual Studio / .NET)
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.rsuser
+TestResults/
+
+# Outros editores
+.vscode/
+.idea/
+*.DotSettings.user
+
+# Banco de dados e backups locais (dados de cada máquina, não versionar).
+# Os dois casos explícitos: o Git no Linux/macOS diferencia maiúsculas (DATABASE.FDB).
+*.fdb
+*.FDB
+*.fbk
+*.FBK
+
+# Configuração real (tem caminhos/senha de cada máquina) — versionar só config.exemplo.ini
+config.ini
+
+# Logs (o sistema grava Log\RelatorioLog.log ao lado do executável)
+*.log
+Log/
+
+# Saída do build-instalador.ps1 (publicação, banco vazio, instalador) e entregas (prints, relatórios de exemplo)
+artifacts/
+
+# Claude Code: permissões locais e imagens coladas na conversa (a documentação .md continua versionada)
+.claude/settings.local.json
+.claude/*.png
+.claude/*.jpg
+
+# Windows / Office
+Thumbs.db
+Desktop.ini
+~$*
+*.tmp

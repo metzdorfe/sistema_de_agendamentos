@@ -1,0 +1,55 @@
+FEST AGENDA - UTILITÁRIOS DE MANUTENÇÃO
+=======================================
+
+Esta pasta tem ferramentas para cuidar do banco de dados do sistema.
+Antes de usar qualquer uma delas, FECHE O FEST AGENDA: o banco (Firebird
+embarcado) fica aberto com exclusividade enquanto o sistema está em uso.
+
+Onde ficam as coisas (dentro da pasta do sistema, normalmente C:\FestAgenda):
+
+  BD\basefestagenda.fdb     o banco de dados (clientes, agendamentos, financeiro...)
+  Arquivos\             imagens do sistema (ex.: Arquivos\Empresa = logo da empresa)
+  Log\                  RelatorioLog.log: uma linha por relatório gerado (ou que falhou)
+  config.ini            conexão com o banco
+  Utilitarios\Backups\  backups feitos pelo backup.bat
+
+Para ter TUDO guardado, copie as pastas BD e Arquivos (com o sistema fechado)
+ou use o backup.bat e guarde também a pasta Arquivos.
+
+
+backup.bat
+----------
+Faz uma cópia de segurança do banco em Utilitarios\Backups, com a data e a hora
+no nome (ex.: basefestagenda_2026-10-17_183005.fbk). Guarde cópias fora deste
+computador (pen drive, nuvem). Recomendado: toda semana e antes de atualizar.
+
+restaurar.bat
+-------------
+Volta o banco para o estado de um backup (.fbk). Pergunta qual arquivo usar
+(ou receba o caminho como parâmetro: restaurar.bat "D:\backup.fbk").
+O banco atual NÃO é apagado: fica guardado em
+BD\basefestagenda_antes-da-restauracao_<data>.fdb, caso precise voltar.
+
+verificar-banco.bat
+-------------------
+Verifica a integridade do banco (gfix -v -full). Só lê e informa; não corrige.
+Use se o sistema mostrar erros estranhos ao abrir ou gravar.
+
+abrir-isql.bat
+--------------
+Abre o isql, o console SQL do Firebird, já conectado no banco do sistema.
+Para suporte técnico. Cuidado: comandos de alteração (UPDATE, DELETE) só são
+gravados depois de COMMIT; e não podem ser desfeitos.
+
+Scripts\
+--------
+  schema.sql          estrutura completa do banco (domínios, tabelas, COMMENT ON)
+  dados-iniciais.sql  configuração inicial e espécies de pagamento padrão
+  alteracoes-*.sql    atualizações para bancos criados em versões anteriores
+
+Ferramentas do Firebird 5 (usadas pelos .bat): isql.exe, gbak.exe, gfix.exe.
+Elas usam o Firebird embarcado que fica na pasta do sistema (fbclient.dll e
+plugins\), por isso esta pasta precisa continuar dentro da pasta do sistema.
+
+Banco em outro lugar ou num servidor Firebird (config.ini com Tipo=Servidor)?
+Ajuste a variável BANCO no arquivo ambiente.bat.

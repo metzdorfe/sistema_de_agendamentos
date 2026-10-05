@@ -1,0 +1,148 @@
+<UserControl x:Class="EspacoFestas.Views.AgendaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:EspacoFestas.Controls"
+             PreviewKeyDown="UserControl_PreviewKeyDown" SizeChanged="UserControl_SizeChanged">
+    <Grid>
+        <Grid Margin="32,28,32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                        Content="Novo Agendamento" VerticalAlignment="Top" Click="BtnNovo_Click"/>
+                <StackPanel>
+                    <TextBlock Text="Agendamentos" Style="{StaticResource TextoTituloTela}"/>
+                    <TextBlock Text="Visualize e gerencie os eventos do seu espaço." Style="{StaticResource TextoSubtitulo}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <DockPanel Grid.Row="1" Margin="0,24,0,16">
+                <Border DockPanel.Dock="Right" Style="{StaticResource GrupoAbas}">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="AbaMes" Style="{StaticResource Aba}" Content="Mês" GroupName="VisaoAgenda" Click="AbaVisao_Click"/>
+                        <RadioButton x:Name="AbaSemana" Style="{StaticResource Aba}" Content="Semana" GroupName="VisaoAgenda" Click="AbaVisao_Click"/>
+                        <RadioButton x:Name="AbaDia" Style="{StaticResource Aba}" Content="Dia" GroupName="VisaoAgenda" Click="AbaVisao_Click"/>
+                    </StackPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal">
+                    <Border Style="{StaticResource GrupoAbas}" Padding="4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="BtnAnterior" Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeAnterior}"
+                                    ToolTip="Mês anterior" Click="BtnAnterior_Click"/>
+                            <TextBlock x:Name="TxtPeriodo" MinWidth="150" TextAlignment="Center" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" Margin="4,0"/>
+                            <Button x:Name="BtnProximo" Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeProximo}"
+                                    ToolTip="Próximo mês" Click="BtnProximo_Click"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Content="Hoje" Style="{StaticResource BotaoFantasma}" Margin="8,0,0,0" Click="BtnHoje_Click"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Border Grid.Row="2" Style="{StaticResource Cartao}" Padding="0" ClipToBounds="True">
+                <Grid>
+                    <!-- Mês: grade 7x6 com pílulas por status -->
+                    <Grid x:Name="VisaoMes">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Border BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1">
+                            <UniformGrid x:Name="CabecalhoSemana" Columns="7" Height="40"/>
+                        </Border>
+                        <UniformGrid x:Name="GradeDias" Grid.Row="1" Columns="7" Rows="6"/>
+                    </Grid>
+
+                    <!-- Semana: 7 colunas (dom–sáb) com os agendamentos de cada dia em cards -->
+                    <Grid x:Name="VisaoSemana" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Border BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1">
+                            <UniformGrid x:Name="CabecalhoVisaoSemana" Columns="7" Height="56"/>
+                        </Border>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <UniformGrid x:Name="ColunasSemana" Columns="7" Rows="1" MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"/>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- Dia: lista vertical por horário, com o status real -->
+                    <Grid x:Name="VisaoDia" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="ListaVisaoDia" Margin="24,20,24,8"/>
+                        </ScrollViewer>
+                        <StackPanel x:Name="VazioVisaoDia" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                            <ctl:Icone Dados="{StaticResource IconeNovoAgendamento}" Foreground="{DynamicResource CorTextoSecundario}"
+                                       Width="40" Height="40"/>
+                            <TextBlock Text="Nenhum agendamento" Style="{StaticResource TextoTituloSecao}" HorizontalAlignment="Center" Margin="0,16,0,4"/>
+                            <TextBlock Text="Este dia está livre." Style="{StaticResource TextoAuxiliar}" HorizontalAlignment="Center"/>
+                            <Button Content="Novo agendamento" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                                    HorizontalAlignment="Center" Margin="0,16,0,0" Click="BtnNovoVisaoDia_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Legenda fixa: status nunca depende só da cor -->
+            <WrapPanel Grid.Row="3" Margin="0,16,0,0">
+                <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                    <Border Width="14" Height="14" CornerRadius="4" Background="{DynamicResource CorSuperficie}"
+                            BorderBrush="{DynamicResource CorBorda}" BorderThickness="1"/>
+                    <TextBlock Text="Livre" Style="{StaticResource TextoAuxiliar}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                    <Border Width="14" Height="14" CornerRadius="4" Background="{DynamicResource CorBotaoPrincipal}"/>
+                    <TextBlock Text="Agendado / Faturado" Style="{StaticResource TextoAuxiliar}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                    <Border Width="14" Height="14" CornerRadius="4" Background="{DynamicResource CorOrcamentoPreenchido}"/>
+                    <TextBlock Text="Orçamento com sinal (reserva a data)" Style="{StaticResource TextoAuxiliar}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="14" Height="14" RadiusX="4" RadiusY="4" Stroke="{DynamicResource CorOrcamento}"
+                               StrokeThickness="1.5" StrokeDashArray="2 1.5"/>
+                    <TextBlock Text="Orçamento sem sinal (não reserva)" Style="{StaticResource TextoAuxiliar}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </WrapPanel>
+        </Grid>
+
+        <!-- Painel do dia: desliza da direita, por cima do calendário -->
+        <Border x:Name="Sombra" Background="{DynamicResource CorFundo}" Opacity="0" Visibility="Collapsed"
+                MouseLeftButtonDown="Sombra_MouseLeftButtonDown"/>
+        <Border x:Name="PainelDia" Width="400" HorizontalAlignment="Right" Visibility="Collapsed"
+                Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="1,0,0,0">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="DeslocamentoPainel"/>
+            </Border.RenderTransform>
+            <DockPanel Margin="24">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,20">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeFechar}"
+                            VerticalAlignment="Top" ToolTip="Fechar (Esc)" Click="BtnFecharDia_Click"/>
+                    <StackPanel>
+                        <TextBlock x:Name="TxtDiaTitulo" Style="{StaticResource TextoTituloSecao}" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TxtDiaResumo" Style="{StaticResource TextoAuxiliar}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+                <Button DockPanel.Dock="Bottom" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
+                        Content="Novo agendamento" HorizontalAlignment="Stretch" Margin="0,16,0,0" Click="BtnNovoDia_Click"/>
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="ListaDia"/>
+                    </ScrollViewer>
+                    <StackPanel x:Name="VazioDia" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                        <ctl:Icone Dados="{StaticResource IconeNovoAgendamento}" Foreground="{DynamicResource CorTextoSecundario}"
+                                   Width="40" Height="40"/>
+                        <TextBlock Text="Nenhum agendamento" Style="{StaticResource TextoTituloSecao}" HorizontalAlignment="Center" Margin="0,16,0,4"/>
+                        <TextBlock Text="Este dia está livre." Style="{StaticResource TextoAuxiliar}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

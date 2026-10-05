@@ -1,0 +1,168 @@
+<Window x:Class="EspacoFestas.Views.FaturamentoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:EspacoFestas.Controls"
+        Title="Faturar agendamento" Width="680" Height="720"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        FontFamily="{StaticResource FonteInter}" FontSize="14" Foreground="{DynamicResource CorTexto}"
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <!-- Faturamento (RF10): espécie, quantas parcelas e como vencem (dia fixo do mês ou intervalo de dias).
+         "Gerar parcelamento" mostra as parcelas; "Confirmar faturamento" grava no Receber e fatura. -->
+    <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="1" CornerRadius="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Cabeçalho -->
+            <Border BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1" Background="Transparent"
+                    MouseLeftButtonDown="Cabecalho_MouseLeftButtonDown">
+                <DockPanel Margin="24,20,16,16">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeFechar}"
+                            VerticalAlignment="Top" ToolTip="Fechar (Esc)" Click="BtnCancelar_Click"/>
+                    <StackPanel>
+                        <TextBlock Text="Faturar agendamento" Style="{StaticResource TextoTituloSecao}" FontSize="20"/>
+                        <TextBlock x:Name="TxtEvento" Style="{StaticResource TextoAuxiliar}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,0,24,8">
+                <StackPanel Margin="0,16,0,0">
+                    <!-- Resumo -->
+                    <UniformGrid Columns="3" Margin="-6,0,-6,20">
+                        <Border Style="{StaticResource Cartao}" Padding="16,12" Margin="6,0">
+                            <StackPanel>
+                                <TextBlock Text="Total do agendamento" Style="{StaticResource TextoAuxiliar}"/>
+                                <TextBlock x:Name="TxtTotal" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Cartao}" Padding="16,12" Margin="6,0">
+                            <StackPanel>
+                                <TextBlock Text="Já pago (sinal)" Style="{StaticResource TextoAuxiliar}"/>
+                                <TextBlock x:Name="TxtPago" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Cartao}" Padding="16,12" Margin="6,0" BorderBrush="{DynamicResource CorBotaoPrincipal}">
+                            <StackPanel>
+                                <TextBlock Text="A faturar" Style="{StaticResource TextoAuxiliar}"/>
+                                <TextBlock x:Name="TxtAFaturar" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource CorEnfase}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Sinal já cobre tudo: nada a parcelar -->
+                    <Border x:Name="AvisoQuitado" Style="{StaticResource Selo}" HorizontalAlignment="Stretch" Padding="12,10" CornerRadius="8"
+                            Margin="0,0,0,16" Visibility="Collapsed">
+                        <TextBlock Text="O que já foi pago cobre o total. Confirme para faturar sem gerar parcelas." TextWrapping="Wrap" FontWeight="Normal"/>
+                    </Border>
+
+                    <StackPanel x:Name="PainelPlano">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="160"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Espécie *" Style="{StaticResource TextoRotulo}"/>
+                                <ComboBox x:Name="CmbEspecie" SelectionChanged="Plano_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Em quantas vezes *" Style="{StaticResource TextoRotulo}"/>
+                                <TextBox x:Name="TxtParcelas" Style="{StaticResource CampoValor}" ctl:Mascara.Tipo="Inteiro" ctl:Mascara.Maximo="48"
+                                         Text="1" TextChanged="Plano_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock x:Name="TxtAvisoEspecie" Style="{StaticResource TextoAuxiliar}" Margin="0,6,0,0" Visibility="Collapsed"
+                                   Text="Esta espécie não permite parcelamento: só 1 vez (RN15)."/>
+
+                        <TextBlock Text="Vencimento das parcelas *" Style="{StaticResource TextoRotulo}" Margin="0,16,0,8"/>
+                        <WrapPanel>
+                            <RadioButton x:Name="OpcaoDiaFixo" Style="{StaticResource OpcaoRadio}" GroupName="ModoVencimento" IsChecked="True" Checked="Plano_Changed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Todo dia" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtDiaFixo" Width="56" MinHeight="32" Margin="8,0" Style="{StaticResource CampoValor}"
+                                             ctl:Mascara.Tipo="Inteiro" ctl:Mascara.Maximo="31" TextChanged="Plano_Changed" GotFocus="TxtDiaFixo_GotFocus"/>
+                                    <TextBlock Text="do mês" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="OpcaoIntervalo" Style="{StaticResource OpcaoRadio}" GroupName="ModoVencimento" Checked="Plano_Changed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="A cada" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtIntervalo" Width="56" MinHeight="32" Margin="8,0" Style="{StaticResource CampoValor}" Text="30"
+                                             ctl:Mascara.Tipo="Inteiro" ctl:Mascara.Maximo="365" TextChanged="Plano_Changed" GotFocus="TxtIntervalo_GotFocus"/>
+                                    <TextBlock Text="dias" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </WrapPanel>
+
+                        <CheckBox x:Name="ChkPrimeiraHoje" Content="1ª parcela recebida hoje (entra direto no caixa)" Margin="0,8,0,0"
+                                  Checked="Plano_Changed" Unchecked="Plano_Changed"/>
+
+                        <Button x:Name="BtnGerar" Content="Gerar parcelamento" ctl:Estilo.Icone="{StaticResource IconeReceber}"
+                                HorizontalAlignment="Left" Margin="0,20,0,0" Click="BtnGerar_Click"/>
+
+                        <!-- Parcelas geradas: vencimento ainda pode ser ajustado antes de confirmar -->
+                        <StackPanel x:Name="PainelParcelas" Margin="0,20,0,0" Visibility="Collapsed">
+                            <DockPanel Margin="0,0,0,8">
+                                <TextBlock x:Name="TxtSomaParcelas" DockPanel.Dock="Right" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <TextBlock Text="Parcelas" Style="{StaticResource TextoTituloSecao}"/>
+                            </DockPanel>
+                            <Border BorderBrush="{DynamicResource CorBorda}" BorderThickness="1" CornerRadius="12" Padding="8,4">
+                                <DataGrid x:Name="GradeParcelas" MaxHeight="260" VerticalScrollBarVisibility="Auto">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Parcela" Binding="{Binding Rotulo}" Width="90" ElementStyle="{StaticResource CelulaNegrito}"/>
+                                        <DataGridTemplateColumn Header="Vencimento" Width="150">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBox Text="{Binding VencimentoTexto, UpdateSourceTrigger=PropertyChanged}" MinHeight="32" Margin="0,4"
+                                                             ctl:Mascara.Tipo="Data" IsReadOnly="{Binding RecebidaHoje}" ToolTip="Pode ajustar o vencimento"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Valor" Binding="{Binding ValorTexto}" Width="*"
+                                                            ElementStyle="{StaticResource CelulaDireita}" HeaderStyle="{StaticResource CabecalhoDireita}"/>
+                                        <DataGridTemplateColumn Header="Situação" Width="150">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border x:Name="Selo" Style="{StaticResource SeloDestaque}" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Situacao}"/>
+                                                    </Border>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding RecebidaHoje}" Value="True">
+                                                            <Setter TargetName="Selo" Property="Style" Value="{StaticResource SeloSucesso}"/>
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock x:Name="TxtErro" Style="{StaticResource TextoErro}" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Rodapé -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,1,0,0" Padding="24,16">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Style="{StaticResource TextoAuxiliar}" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300"
+                               Text="Depois de faturado, itens e valores não mudam mais (RN17)."/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancelar" Style="{StaticResource BotaoFantasma}" Margin="0,0,8,0" Click="BtnCancelar_Click"/>
+                        <Button x:Name="BtnConfirmar" Content="Confirmar faturamento" Style="{StaticResource BotaoPrincipal}" IsEnabled="False"
+                                ToolTipService.ShowOnDisabled="True" ToolTip="Gere o parcelamento primeiro" Click="BtnConfirmar_Click"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

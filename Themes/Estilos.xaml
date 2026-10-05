@@ -1,0 +1,918 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctl="clr-namespace:EspacoFestas.Controls">
+    <!-- Estilos comuns aos dois temas. Cores sempre por {DynamicResource ...} (Dark.xaml / Light.xaml).
+         Espaçamento em múltiplos de 8; cantos 8px em botões e inputs, 12px em cards e painéis. -->
+
+    <FontFamily x:Key="FonteInter">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
+    <!-- Só o nome "Fest Agenda" (navbar, splash, Sobre): Pacifico, SIL OFL 1.1 (Assets/Fonts/OFL-Pacifico.txt) -->
+    <FontFamily x:Key="FonteMarca">pack://application:,,,/Assets/Fonts/#Pacifico</FontFamily>
+
+    <!-- Marca: logo da UnC pela chave ImagemLogoUnc (definida em cada tema: colorida no claro, branca no escuro). -->
+
+    <Duration x:Key="DuracaoCurta">0:0:0.15</Duration>
+
+    <!-- ===================================================================== -->
+    <!-- Ícone                                                                 -->
+    <!-- ===================================================================== -->
+    <Style TargetType="ctl:Icone">
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ctl:Icone">
+                    <Viewbox Stretch="Uniform">
+                        <Canvas Width="24" Height="24">
+                            <Path Data="{TemplateBinding Dados}" Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                        </Canvas>
+                    </Viewbox>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Textos                                                                -->
+    <!-- ===================================================================== -->
+    <Style x:Key="TextoTituloTela" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+    </Style>
+    <Style x:Key="TextoSubtitulo" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="Margin" Value="0,4,0,0"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style x:Key="TextoTituloSecao" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+    </Style>
+    <Style x:Key="TextoRotulo" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+    <Style x:Key="TextoAuxiliar" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style x:Key="TextoValor" TargetType="TextBlock">
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+    </Style>
+    <Style x:Key="TextoErro" TargetType="TextBlock" BasedOn="{StaticResource TextoAuxiliar}">
+        <Setter Property="Foreground" Value="{DynamicResource CorErro}"/>
+    </Style>
+    <Style x:Key="TextoSucesso" TargetType="TextBlock" BasedOn="{StaticResource TextoAuxiliar}">
+        <Setter Property="Foreground" Value="{DynamicResource CorSucesso}"/>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Cartões e selos                                                       -->
+    <!-- ===================================================================== -->
+    <Style x:Key="Cartao" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CorSuperficie}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="24"/>
+    </Style>
+
+    <Style x:Key="Selo" TargetType="Border">
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="TextElement.FontSize" Value="12"/>
+        <Setter Property="TextElement.FontWeight" Value="Medium"/>
+    </Style>
+    <Style x:Key="SeloPrincipal" TargetType="Border" BasedOn="{StaticResource Selo}">
+        <Setter Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorTextoSobrePrincipal}"/>
+    </Style>
+    <Style x:Key="SeloDestaque" TargetType="Border" BasedOn="{StaticResource Selo}">
+        <Setter Property="Background" Value="{DynamicResource CorPrincipalFundo}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorDestaque}"/>
+    </Style>
+    <Style x:Key="SeloSucesso" TargetType="Border" BasedOn="{StaticResource Selo}">
+        <Setter Property="Background" Value="{DynamicResource CorSucessoFundo}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorSucesso}"/>
+    </Style>
+    <Style x:Key="SeloOrcamento" TargetType="Border" BasedOn="{StaticResource Selo}">
+        <Setter Property="Background" Value="{DynamicResource CorOrcamentoFundo}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorOrcamento}"/>
+    </Style>
+    <Style x:Key="SeloOrcamentoContorno" TargetType="Border" BasedOn="{StaticResource Selo}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CorOrcamento}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorOrcamento}"/>
+    </Style>
+    <Style x:Key="SeloErro" TargetType="Border" BasedOn="{StaticResource Selo}">
+        <Setter Property="Background" Value="{DynamicResource CorErroFundo}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorErro}"/>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Botões                                                                -->
+    <!-- ===================================================================== -->
+    <ControlTemplate x:Key="TemplateBotao" TargetType="ButtonBase">
+        <Grid>
+            <Border x:Name="Fundo" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" SnapsToDevicePixels="True"/>
+            <Border x:Name="Realce" Background="{Binding (ctl:Estilo.CorHover), RelativeSource={RelativeSource TemplatedParent}}"
+                    CornerRadius="8" Opacity="0"/>
+            <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}"
+                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center">
+                <ctl:Icone x:Name="Icone" Dados="{Binding (ctl:Estilo.Icone), RelativeSource={RelativeSource TemplatedParent}}"
+                           Foreground="{TemplateBinding Foreground}" Width="16" Height="16" Margin="0,0,8,0"/>
+                <ContentPresenter RecognizesAccessKey="True" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="ctl:Estilo.Icone" Value="{x:Null}">
+                <Setter TargetName="Icone" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="Content" Value="{x:Null}">
+                <Setter TargetName="Icone" Property="Margin" Value="0"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="Realce" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="Realce" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Contorno de foco só na navegação por teclado -->
+    <Style x:Key="FocoTeclado">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border BorderBrush="{DynamicResource CorFoco}" BorderThickness="2" CornerRadius="8" Margin="-2"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Padrão: botão secundário (contorno) -->
+    <Style TargetType="Button">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocoTeclado}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="ctl:Estilo.CorHover" Value="{DynamicResource CorSuperficieElevada}"/>
+        <Setter Property="Template" Value="{StaticResource TemplateBotao}"/>
+    </Style>
+
+    <Style x:Key="BotaoSecundario" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"/>
+
+    <Style x:Key="BotaoPrincipal" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSobrePrincipal}"/>
+        <Setter Property="ctl:Estilo.CorHover" Value="{DynamicResource CorBotaoPrincipalHover}"/>
+    </Style>
+
+    <Style x:Key="BotaoPerigo" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="BorderBrush" Value="{DynamicResource CorErro}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorErro}"/>
+        <Setter Property="ctl:Estilo.CorHover" Value="{DynamicResource CorErroFundo}"/>
+    </Style>
+
+    <!-- Sem fundo nem borda: ações discretas e botões de ícone -->
+    <Style x:Key="BotaoFantasma" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="Padding" Value="8,0"/>
+    </Style>
+
+    <Style x:Key="BotaoIcone" TargetType="Button" BasedOn="{StaticResource BotaoFantasma}">
+        <Setter Property="MinHeight" Value="32"/>
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="BotaoLink" TargetType="Button" BasedOn="{StaticResource BotaoFantasma}">
+        <Setter Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+        <Setter Property="MinHeight" Value="32"/>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Campos de texto (Tag = texto de dica; ctl:Estilo.Icone = ícone à esquerda) -->
+    <!-- ===================================================================== -->
+    <Style TargetType="TextBox">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource CorBotaoPrincipalHover}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid>
+                        <Border x:Name="Borda" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="8" SnapsToDevicePixels="True">
+                            <!-- O TextBox já aplica o Padding no PART_ContentHost; a dica usa o mesmo Padding para alinhar -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ctl:Icone x:Name="Icone" Dados="{Binding (ctl:Estilo.Icone), RelativeSource={RelativeSource TemplatedParent}}"
+                                           Foreground="{DynamicResource CorTextoSecundario}" Width="16" Height="16" Margin="12,0,-4,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock x:Name="Dica" Grid.Column="1" Text="{TemplateBinding Tag}" Foreground="{DynamicResource CorTextoSecundario}"
+                                           Opacity="0.7" Padding="2,0,0,0" Margin="{TemplateBinding Padding}" IsHitTestVisible="False"
+                                           Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Grid.Column="1" Focusable="False"
+                                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ctl:Estilo.Icone" Value="{x:Null}">
+                            <Setter TargetName="Icone" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="Dica" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoSecundario}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorFoco}"/>
+                        </Trigger>
+                        <Trigger Property="IsReadOnly" Value="True">
+                            <Setter TargetName="Borda" Property="Background" Value="Transparent"/>
+                        </Trigger>
+                        <!-- Validação inline: borda vermelha (vence hover e foco por vir depois) -->
+                        <Trigger Property="ctl:Estilo.Erro" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorErro}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="CampoValor" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="TextAlignment" Value="Right"/>
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+    </Style>
+
+    <Style x:Key="CampoMultilinha" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="MinHeight" Value="72"/>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- ComboBox                                                              -->
+    <!-- ===================================================================== -->
+    <Style x:Key="BotaoCombo" TargetType="ToggleButton">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="ClickMode" Value="Press"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Borda" Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}"
+                            BorderThickness="1" CornerRadius="8" SnapsToDevicePixels="True">
+                        <Path x:Name="Seta" Data="M 0 0 L 4 4 L 8 0" Stroke="{DynamicResource CorTextoSecundario}" StrokeThickness="1.5"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                              HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoSecundario}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorFoco}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="12,0,32,0"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton Style="{StaticResource BotaoCombo}"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        <Border x:Name="BordaErro" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource CorErro}"
+                                IsHitTestVisible="False" Visibility="Collapsed"/>
+                        <!-- Tag = texto de dica quando nada está selecionado -->
+                        <TextBlock x:Name="Dica" Text="{TemplateBinding Tag}" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource CorTextoSecundario}" Opacity="0.7" IsHitTestVisible="False" Visibility="Collapsed"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center" IsHitTestVisible="False"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"/>
+                        <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True"
+                               Focusable="False" PopupAnimation="Fade">
+                            <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="1"
+                                    CornerRadius="8" Padding="4" Margin="0,4,0,0"
+                                    MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                <ScrollViewer>
+                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                        <Trigger Property="ctl:Estilo.Erro" Value="True">
+                            <Setter TargetName="BordaErro" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="SelectedItem" Value="{x:Null}">
+                            <Setter TargetName="Dica" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Fundo" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- CheckBox e interruptor                                                -->
+    <!-- ===================================================================== -->
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="Caixa" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
+                                Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}">
+                            <Path x:Name="Marca" Data="M 1 5 L 4.5 8.5 L 11 1" Stroke="{DynamicResource CorTextoSobrePrincipal}" StrokeThickness="2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                        </Border>
+                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource CorDestaque}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Marca" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Interruptor" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="Trilho" Width="40" Height="22" CornerRadius="11" BorderThickness="1"
+                                Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}">
+                            <Ellipse x:Name="Botao" Width="16" Height="16" Margin="2,0" HorizontalAlignment="Left"
+                                     Fill="{DynamicResource CorTextoSecundario}">
+                                <Ellipse.RenderTransform>
+                                    <TranslateTransform x:Name="Deslocamento" X="0"/>
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+                        </Border>
+                        <ContentPresenter Margin="12,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Trilho" Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Trilho" Property="BorderBrush" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Botao" Property="Fill" Value="{DynamicResource CorTextoSobrePrincipal}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Deslocamento" Storyboard.TargetProperty="X" To="18" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Deslocamento" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Navbar (RadioButton; Tag = ícone). Ativo: barrinha à esquerda na cor de destaque + superfície elevada -->
+    <!-- ===================================================================== -->
+    <Style x:Key="ItemNavbar" TargetType="RadioButton">
+        <Setter Property="GroupName" Value="Navbar"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Margin" Value="0,2"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="ToolTipService.Placement" Value="Right"/>
+        <Setter Property="ToolTipService.IsEnabled" Value="{Binding (ctl:Navbar.Recolhida), RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid Background="Transparent">
+                        <Border x:Name="Fundo" CornerRadius="8" Background="{DynamicResource CorSuperficieElevada}" Opacity="0"/>
+                        <Border x:Name="Barra" Width="3" Height="18" CornerRadius="2" HorizontalAlignment="Left"
+                                Background="{DynamicResource CorDestaque}" Visibility="Hidden"/>
+                        <StackPanel x:Name="Conteudo" Orientation="Horizontal" Margin="16,0" VerticalAlignment="Center">
+                            <ctl:Icone x:Name="Icone" Dados="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                       Foreground="{TemplateBinding Foreground}"/>
+                            <ContentPresenter x:Name="Texto" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Fundo" Property="Opacity" Value="0.5"/>
+                            <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Fundo" Property="Opacity" Value="1"/>
+                            <Setter TargetName="Barra" Property="Visibility" Value="Visible"/>
+                            <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+                            <Setter TargetName="Icone" Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                        </Trigger>
+                        <Trigger Property="ctl:Navbar.Recolhida" Value="True">
+                            <Setter TargetName="Texto" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="Conteudo" Property="HorizontalAlignment" Value="Center"/>
+                            <Setter TargetName="Conteudo" Property="Margin" Value="0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SubItemNavbar" TargetType="RadioButton">
+        <Setter Property="GroupName" Value="SubNavbar"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Fundo" Background="Transparent" CornerRadius="6" Padding="46,0,8,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse x:Name="Ponto" Width="4" Height="4" Fill="{TemplateBinding Foreground}" Margin="0,0,10,0"/>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Abas segmentadas (Mês/Semana/Dia, abas do Financeiro e das Configurações) -->
+    <!-- ===================================================================== -->
+    <Style x:Key="GrupoAbas" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CorSuperficie}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <Style x:Key="Aba" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Padding" Value="16,7"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Fundo" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource CorTextoSobrePrincipal}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Cartão selecionável (escolha do tema) -->
+    <Style x:Key="OpcaoCartao" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Borda" Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}"
+                            BorderThickness="1" CornerRadius="12" Padding="16">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoSecundario}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Borda" Property="BorderThickness" Value="2"/>
+                            <Setter TargetName="Borda" Property="Background" Value="{DynamicResource CorPrincipalFundo}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Opção de escolha única em linha (faixas de preço no agendamento): bolinha + conteúdo -->
+    <Style x:Key="OpcaoRadio" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocoTeclado}"/>
+        <Setter Property="Margin" Value="0,0,8,8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Borda" Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}"
+                            BorderThickness="1" CornerRadius="8" Padding="12,8">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="16" Height="16" VerticalAlignment="Center">
+                                <Ellipse x:Name="Aro" Stroke="{DynamicResource CorBotaoSecundario}" StrokeThickness="1.5"/>
+                                <Ellipse x:Name="Ponto" Width="8" Height="8" Fill="{DynamicResource CorBotaoPrincipal}" Visibility="Collapsed"/>
+                            </Grid>
+                            <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoSecundario}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Borda" Property="Background" Value="{DynamicResource CorPrincipalFundo}"/>
+                            <Setter TargetName="Aro" Property="Stroke" Value="{DynamicResource CorBotaoPrincipal}"/>
+                            <Setter TargetName="Ponto" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- DataGrid: só divisórias horizontais bem apagadas                      -->
+    <!-- ===================================================================== -->
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="CanUserResizeRows" Value="False"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource CorBorda}"/>
+        <Setter Property="RowHeaderWidth" Value="0"/>
+        <Setter Property="MinRowHeight" Value="48"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridColumnHeader">
+                    <Border Background="Transparent" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1" Padding="16,12">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="DataGridCell">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="Transparent" Padding="16,0">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="CelulaDireita" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+    </Style>
+    <Style x:Key="CabecalhoDireita" TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+        <Setter Property="HorizontalContentAlignment" Value="Right"/>
+    </Style>
+    <Style x:Key="CelulaTexto" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+    </Style>
+    <Style x:Key="CelulaNegrito" TargetType="TextBlock" BasedOn="{StaticResource CelulaTexto}">
+        <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Listas sem cromo (faixas, adicionais, espécies)                       -->
+    <!-- ===================================================================== -->
+    <Style x:Key="ListaLimpa" TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border x:Name="Fundo" Background="Transparent" CornerRadius="8" Padding="8,0"
+                                        BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- Barras de rolagem finas                                               -->
+    <!-- ===================================================================== -->
+    <Style x:Key="PolegarRolagem" TargetType="Thumb">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border x:Name="Polegar" CornerRadius="4" Background="{DynamicResource CorBorda}"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Polegar" Property="Background" Value="{DynamicResource CorBotaoSecundario}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="MinWidth" Value="8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Track x:Name="PART_Track" IsDirectionReversed="True">
+                        <Track.Thumb>
+                            <Thumb Style="{StaticResource PolegarRolagem}" Margin="1"/>
+                        </Track.Thumb>
+                    </Track>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="MinWidth" Value="0"/>
+                <Setter Property="Height" Value="8"/>
+                <Setter Property="MinHeight" Value="8"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Track x:Name="PART_Track" IsDirectionReversed="False">
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource PolegarRolagem}" Margin="1"/>
+                                </Track.Thumb>
+                            </Track>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ===================================================================== -->
+    <!-- ToolTip e menu de contexto                                            -->
+    <!-- ===================================================================== -->
+    <Style TargetType="ToolTip">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}"
+                            BorderThickness="1" CornerRadius="6" Padding="8,4">
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ContextMenu">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}"
+                            BorderThickness="1" CornerRadius="8" Padding="4" MinWidth="160">
+                        <ItemsPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="Fundo" Background="Transparent" CornerRadius="6" Padding="12,8">
+                        <StackPanel Orientation="Horizontal">
+                            <ctl:Icone x:Name="Icone" Dados="{Binding (ctl:Estilo.Icone), RelativeSource={RelativeSource TemplatedParent}}"
+                                       Foreground="{TemplateBinding Foreground}" Width="16" Height="16" Margin="0,0,10,0"/>
+                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ctl:Estilo.Icone" Value="{x:Null}">
+                            <Setter TargetName="Icone" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

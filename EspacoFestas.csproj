@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+
+    <!-- Nome do sistema: Fest Agenda (FestAgenda.exe). O namespace continua EspacoFestas. -->
+    <AssemblyName>FestAgenda</AssemblyName>
+    <RootNamespace>EspacoFestas</RootNamespace>
+    <Product>Fest Agenda</Product>
+    <AssemblyTitle>Fest Agenda</AssemblyTitle>
+    <Company>Universidade do Contestado (UnC)</Company>
+    <Copyright>© 2026 Acadêmicos da UnC</Copyright>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <!-- Publicação para o instalador: self-contained, DLLs soltas ao lado do .exe (sem PublishSingleFile).
+       Ver build-instalador.ps1 e Installer/FestAgenda.iss. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include=".claude\modelagem-banco.md" />
+    <None Include=".claude\design-interface.md" />
+    <None Include=".claude\fluxo-sistema.md" />
+    <None Include=".claude\stack-projeto.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- config.ini de desenvolvimento: vai para o bin, nunca para a publicação (o instalador cria o dele a partir do exemplo) -->
+    <None Include="config.ini" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" Condition="Exists('config.ini')" />
+    <None Include="config.exemplo.ini" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Recursos visuais: fonte Inter embutida, marca da UnC, ícone do app e imagem estática da splash (ver design-interface.md) -->
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Resource Include="Assets\Icons\app.ico" />
+    <Resource Include="Assets\Brand\unc_logo.png" />
+    <Resource Include="Assets\Brand\unc_marca.png" />
+    <Resource Include="Assets\Brand\unc_simbolo.png" />
+    <!-- Versões brancas (tema escuro e splash), geradas por Tools/gerar-marca.ps1 -->
+    <Resource Include="Assets\Brand\unc_logo_branca.png" />
+    <Resource Include="Assets\Brand\unc_marca_branca.png" />
+    <Resource Include="Assets\Brand\unc_simbolo_branco.png" />
+    <None Include="Assets\Brand\unc_logo_azul.png" />
+    <SplashScreen Include="Assets\Splash\splash.png" />
+  </ItemGroup>
+
+  <!-- Scripts de atualização embutidos no executável: aplicados pelo Services/AtualizacaoBanco (splash e instalador) -->
+  <ItemGroup>
+    <EmbeddedResource Include="Database\alteracoes-*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="FirebirdSql.EntityFrameworkCore.Firebird" Version="13.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <!-- Só ferramenta de desenvolvimento (scaffold/migrations): fica fora do Release para não levar o Roslyn para o instalador -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" Condition="'$(Configuration)' != 'Release'">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.12" />
+    <PackageReference Include="QuestPDF" Version="2026.9.1" />
+  </ItemGroup>
+
+</Project>

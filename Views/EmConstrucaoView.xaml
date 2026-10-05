@@ -1,0 +1,24 @@
+<UserControl x:Class="EspacoFestas.Views.EmConstrucaoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:EspacoFestas.Controls">
+    <Grid Margin="32,28,32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <Button Style="{StaticResource BotaoLink}" ctl:Estilo.Icone="{StaticResource IconeAnterior}" Content="Agenda"
+                    HorizontalAlignment="Left" Padding="0" Margin="0,0,0,8" Click="BtnVoltar_Click"/>
+            <TextBlock x:Name="TxtTitulo" Style="{StaticResource TextoTituloTela}"/>
+            <TextBlock x:Name="TxtDetalhe" Style="{StaticResource TextoSubtitulo}"/>
+        </StackPanel>
+        <Border Grid.Row="1" Style="{StaticResource Cartao}" Margin="0,24,0,0">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="420">
+                <ctl:Icone Dados="{StaticResource IconeNovoAgendamento}" Foreground="{DynamicResource CorDestaque}" Width="48" Height="48"/>
+                <TextBlock Text="Tela em construção" Style="{StaticResource TextoTituloSecao}" HorizontalAlignment="Center" Margin="0,16,0,8"/>
+                <TextBlock x:Name="TxtMensagem" Style="{StaticResource TextoAuxiliar}" FontSize="14" TextAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

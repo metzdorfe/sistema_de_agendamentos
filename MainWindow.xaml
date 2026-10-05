@@ -1,0 +1,73 @@
+<Window x:Class="EspacoFestas.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:EspacoFestas.Controls"
+        Title="Fest Agenda" Width="1280" Height="800" MinWidth="1024" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource CorFundo}" Foreground="{DynamicResource CorTexto}"
+        FontFamily="{StaticResource FonteInter}" FontSize="14"
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True"
+        SizeChanged="Window_SizeChanged">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="ColunaNavbar" Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Navbar fixa, igual em todas as telas; só o conteúdo à direita muda -->
+        <Border x:Name="PainelNavbar" Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="12,20,12,16">
+                <!-- Marca do sistema: logo da UnC + "Fest Agenda" -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10,0,0,28" x:Name="Marca">
+                    <Image Source="{DynamicResource ImagemLogoUnc}" Width="32" Height="32" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock x:Name="TxtMarca" Text="Fest Agenda" FontFamily="{StaticResource FonteMarca}" FontSize="21" Margin="12,0,0,4" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Rodapé: logo e nome da empresa (v1 monousuário, sem login) → Configurações -->
+                <Button DockPanel.Dock="Bottom" x:Name="BtnEmpresa" Style="{StaticResource BotaoFantasma}" Padding="8" MinHeight="56"
+                        HorizontalContentAlignment="Left" Click="BtnEmpresa_Click" ToolTip="Configurações da empresa">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="36" Height="36" CornerRadius="8" Background="{DynamicResource CorSuperficieElevada}"
+                                BorderBrush="{DynamicResource CorBorda}" BorderThickness="1" ClipToBounds="True">
+                            <Grid>
+                                <Image x:Name="ImgLogoEmpresa" Stretch="Uniform" Margin="2" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock x:Name="TxtIniciais" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel x:Name="TextoEmpresa" Margin="12,0,0,0" VerticalAlignment="Center" MaxWidth="150">
+                            <TextBlock x:Name="TxtNomeEmpresa" Foreground="{DynamicResource CorTexto}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="Configurações" FontSize="12" FontWeight="Normal" Foreground="{DynamicResource CorTextoSecundario}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
+                <Border DockPanel.Dock="Bottom" Height="1" Background="{DynamicResource CorBorda}" Margin="4,8,4,12"/>
+
+                <StackPanel x:Name="ItensNavbar">
+                    <RadioButton x:Name="NavAgenda" Style="{StaticResource ItemNavbar}" Tag="{StaticResource IconeAgenda}"
+                                 Content="Agenda" ToolTip="Agenda" Click="NavAgenda_Click"/>
+                    <RadioButton x:Name="NavClientes" Style="{StaticResource ItemNavbar}" Tag="{StaticResource IconeClientes}"
+                                 Content="Clientes" ToolTip="Clientes" Click="NavClientes_Click"/>
+                    <RadioButton x:Name="NavServicos" Style="{StaticResource ItemNavbar}" Tag="{StaticResource IconeServicos}"
+                                 Content="Serviços" ToolTip="Serviços" Click="NavServicos_Click"/>
+                    <RadioButton x:Name="NavFinanceiro" Style="{StaticResource ItemNavbar}" Tag="{StaticResource IconeFinanceiro}"
+                                 Content="Financeiro" ToolTip="Financeiro" Click="NavFinanceiro_Click"/>
+                    <StackPanel x:Name="SubFinanceiro" Visibility="Collapsed" Margin="0,0,0,4">
+                        <RadioButton x:Name="SubVisaoGeral" Style="{StaticResource SubItemNavbar}" Content="Visão geral" Tag="0" Click="SubFinanceiro_Click"/>
+                        <RadioButton x:Name="SubReceber" Style="{StaticResource SubItemNavbar}" Content="Contas a receber" Tag="1" Click="SubFinanceiro_Click"/>
+                        <RadioButton x:Name="SubCaixa" Style="{StaticResource SubItemNavbar}" Content="Caixa" Tag="2" Click="SubFinanceiro_Click"/>
+                    </StackPanel>
+                    <RadioButton x:Name="NavRelatorios" Style="{StaticResource ItemNavbar}" Tag="{StaticResource IconeRelatorios}"
+                                 Content="Relatórios" ToolTip="Relatórios" Click="NavRelatorios_Click"/>
+                    <RadioButton x:Name="NavConfiguracoes" Style="{StaticResource ItemNavbar}" Tag="{StaticResource IconeConfiguracoes}"
+                                 Content="Configurações" ToolTip="Configurações" Click="NavConfiguracoes_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <ContentControl x:Name="Conteudo" Grid.Column="1" Focusable="False"/>
+
+        <!-- Fundo escurecido atrás das janelas modais (ex.: agendamento) -->
+        <Border x:Name="Overlay" Grid.ColumnSpan="2" Background="{DynamicResource CorOverlay}" Visibility="Collapsed" Panel.ZIndex="100"/>
+    </Grid>
+</Window>

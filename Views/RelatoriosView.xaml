@@ -1,0 +1,15 @@
+<UserControl x:Class="EspacoFestas.Views.RelatoriosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,28,32,24">
+            <TextBlock Text="Relatórios" Style="{StaticResource TextoTituloTela}"/>
+            <TextBlock Text="Escolha um relatório, preencha os filtros e gere em PDF ou Excel." Style="{StaticResource TextoSubtitulo}"/>
+
+            <!-- Cartões montados no code-behind, um por IRelatorio -->
+            <UniformGrid x:Name="GradeRelatorios" Columns="2" Margin="-8,24,-8,0"/>
+
+            <TextBlock x:Name="TxtLog" Style="{StaticResource TextoAuxiliar}" Margin="0,16,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
