@@ -104,6 +104,9 @@
                 <Button x:Name="BtnBaixa" DockPanel.Dock="Right" Style="{StaticResource BotaoPrincipal}" Content="Dar baixa" IsEnabled="False"
                         ctl:Estilo.Icone="{StaticResource IconeReceber}" ToolTip="Selecione uma parcela em aberto" ToolTipService.ShowOnDisabled="True"
                         Click="BtnBaixa_Click"/>
+                <Button x:Name="BtnEstornarParcela" DockPanel.Dock="Right" Style="{StaticResource BotaoSecundario}" Content="Estornar baixa"
+                        IsEnabled="False" Margin="0,0,8,0" ToolTip="Selecione uma parcela paga" ToolTipService.ShowOnDisabled="True"
+                        Click="BtnEstornarParcela_Click"/>
                 <Border Style="{StaticResource GrupoAbas}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="FiltroAbertas" Style="{StaticResource Aba}" Content="Em aberto" IsChecked="True" GroupName="FiltroReceber" Click="FiltroReceber_Click"/>
@@ -160,8 +163,11 @@
         <DockPanel x:Name="PainelCaixa" Grid.Row="2" Visibility="Collapsed">
             <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
                 <Button DockPanel.Dock="Right" Style="{StaticResource BotaoPrincipal}" ctl:Estilo.Icone="{StaticResource IconeMais}"
-                        Content="Lançamento avulso" IsEnabled="False" VerticalAlignment="Center"
-                        ToolTip="Lançamentos avulsos, despesas do evento e estornos: em desenvolvimento" ToolTipService.ShowOnDisabled="True"/>
+                        Content="Novo lançamento" VerticalAlignment="Center"
+                        ToolTip="Despesa do evento, lançamento avulso, suprimento ou sangria" Click="BtnNovoLancamento_Click"/>
+                <Button x:Name="BtnEstornarLancamento" DockPanel.Dock="Right" Style="{StaticResource BotaoSecundario}" Content="Estornar"
+                        IsEnabled="False" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="Selecione uma entrada"
+                        ToolTipService.ShowOnDisabled="True" Click="BtnEstornarLancamento_Click"/>
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Margin="0,0,32,0">
                         <TextBlock Text="Entradas" Style="{StaticResource TextoAuxiliar}"/>
@@ -179,7 +185,7 @@
             </DockPanel>
             <Border Style="{StaticResource Cartao}" Padding="8,4">
                 <Grid>
-                    <DataGrid x:Name="GradeCaixa">
+                    <DataGrid x:Name="GradeCaixa" SelectionChanged="GradeCaixa_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="128"/>
                             <DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" Width="2*" ElementStyle="{StaticResource CelulaNegrito}"/>

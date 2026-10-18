@@ -203,7 +203,7 @@ flowchart TD
     E --> G[Saída no Caixa]
 ```
 
-**Tela de quitar a parcela (04/10/2026):** em Contas a receber, selecionar uma parcela em aberto e clicar **Dar baixa** (ou duplo clique). O popup mostra cliente, evento, parcela (n de N), espécie combinada, vencimento (com os dias de atraso) e valor da parcela; e pede a **data do recebimento** (multa e juros são recalculados por ela), a **espécie usada** (pode ser outra, RN20), **multa** e **juros** (já preenchidos, editáveis), mostra o **total devido** e pede o **valor pago** (já preenchido com o total). Pago menor que o total: **gerar nova parcela com a diferença** (vencimento escolhido, padrão +30 dias) ou **perdoar a diferença** (RN19). Ao confirmar: parcela Paga + entrada no caixa. O estorno ainda não foi feito.
+**Tela de quitar a parcela (04/10/2026):** em Contas a receber, selecionar uma parcela em aberto e clicar **Dar baixa** (ou duplo clique). O popup mostra cliente, evento, parcela (n de N), espécie combinada, vencimento (com os dias de atraso) e valor da parcela; e pede a **data do recebimento** (multa e juros são recalculados por ela), a **espécie usada** (pode ser outra, RN20), **multa** e **juros** (já preenchidos, editáveis), mostra o **total devido** e pede o **valor pago** (já preenchido com o total). Pago menor que o total: **gerar nova parcela com a diferença** (vencimento escolhido, padrão +30 dias) ou **perdoar a diferença** (RN19). Ao confirmar: parcela Paga + entrada no caixa. **Estorno (18/10/2026):** em Contas a receber, parcela paga → **Estornar baixa** (RN21); no Caixa, sinal ou recebimento de parcela → **Estornar** (RN26). Ambos pedem confirmação.
 
 **Juros e multa:**
 ```
@@ -262,7 +262,7 @@ Acessadas pelo perfil da empresa no rodapé da navbar. Tudo gravado no banco (ta
 ## 9. Catálogo em PDF
 
 - Gerado com QuestPDF, puxando direto dos cadastros, então sai sempre com o preço atual.
-- **Acesso (04/10/2026):** cartão **Catálogo de serviços** em Relatórios (gera o PDF sem enviar; filtro de serviço: todos ou um) e o botão da lista de Serviços. O envio ao cliente ("Enviar catálogo", seção 8 do `ajustes.md`) depende do WhatsApp, pendente.
+- **Acesso (04/10/2026):** cartão **Catálogo de serviços** em Relatórios (gera o PDF sem enviar; filtro de serviço: todos ou um) e o botão da lista de Serviços. O envio ao cliente ("Enviar catálogo", seção 8 do `ajustes.md`) entrou em 18/10/2026: botão "Enviar por WhatsApp" no popup do catálogo e "Enviar catálogo pelo WhatsApp" no menu de cada cliente.
 - Cabeçalho com a logo e os dados da empresa (vindos da CONFIGURACAO).
 - Formato:
 
@@ -346,6 +346,7 @@ Senha=masterkey
 - **RN10** – Disponibilidade configurável, **por serviço**. Com a opção "um agendamento por dia" ativa, o serviço fica bloqueado na data por agendamentos Agendados, Faturados ou Orçamentos com sinal pago. Com a opção desligada, não há bloqueio.
 - **RN11** – Orçamento sem sinal não bloqueia a data; ao convertê-lo em Agendado, a disponibilidade é validada de novo.
 - **RN12** – O sinal é gravado direto no caixa, ligado ao agendamento, e não gera parcela.
+- **RN32** – O cliente nunca paga mais que o total: o sinal não pode passar do valor que falta pagar (total − já pago), e o agendamento não pode ser alterado para um total menor que o já pago.
 - **RN28** – Todo agendamento tem título, hora de início e hora de fim. Hora de fim menor que a de início indica que o evento termina no dia seguinte; o evento pertence sempre à data em que começa, inclusive para a disponibilidade.
 
 **Faturamento**
@@ -359,24 +360,29 @@ Senha=masterkey
 - **RN18** – Parcela vencida tem multa e juros simples ao mês, ambos configuráveis. Juros por dia = parcela × taxa mensal ÷ 30; total = parcela + multa + (juros por dia × dias de atraso). Os valores aparecem preenchidos na baixa.
 - **RN19** – Na baixa com valor menor que o total, o sistema pergunta se deseja gerar nova parcela com a diferença. Se sim, cria a parcela com novo vencimento; se não, a diferença é perdoada. Em ambos os casos a parcela original fica paga.
 - **RN20** – A espécie usada na baixa pode ser diferente da combinada na parcela.
-- **RN21** – O estorno de baixa reabre a parcela e lança uma saída no caixa; se a baixa tinha gerado parcela de diferença, ela é cancelada junto.
+- **RN21** – O estorno de baixa reabre a parcela (limpa juros, multa, valor e data recebidos) e lança uma saída no caixa, na espécie da entrada; se a baixa tinha gerado parcela de diferença, ela é cancelada junto. Não é possível estornar se a parcela da diferença já foi paga (estorna-se ela primeiro) nem em agendamento cancelado.
 
 **Cancelamento**
 - **RN22** – O motivo é obrigatório, e a data do cancelamento é registrada.
 - **RN23** – Parcelas em aberto são canceladas e não são cobradas, dentro ou fora do prazo de devolução.
-- **RN24** – Se o cancelamento for feito até X dias antes do evento (X configurável), todos os valores pagos — sinal e parcelas — são devolvidos, com saída no caixa ligada ao agendamento. Depois do prazo, não há devolução.
+- **RN24** – Se o cancelamento for feito até X dias antes do evento (X configurável), todos os valores pagos — sinal e parcelas — são devolvidos, com saída no caixa ligada ao agendamento. Depois do prazo, não há devolução. Desde 18/10/2026 a devolução é uma saída para cada entrada (mesma espécie e mesma origem), apontando para ela, como o estorno; assim não se confunde com despesa do evento.
 - **RN25** – Nada é apagado; todo o histórico financeiro permanece.
 - **RN27** – O cancelamento só pode ser feito até a data do evento, inclusive (data do cancelamento ≤ data do evento).
 
 **Estorno**
-- **RN26** – Estorno de pagamento à vista ou de sinal é uma saída no caixa ligada ao agendamento.
+- **RN26** – Estorno de sinal é uma saída no caixa ligada ao agendamento, apontando para a entrada estornada. Orçamento cujo sinal foi estornado deixa de bloquear a data. Não é possível estornar sinal de agendamento faturado (o sinal já abateu o faturamento; o caminho é cancelar) nem de cancelado. O pagamento à vista do faturamento é a parcela recebida no dia e se estorna como baixa (RN21). Entrada avulsa também pode ser estornada. Saída não se estorna. Cada entrada só pode ser estornada uma vez.
+
+**Caixa**
+- **RN33** – Lançamento feito à mão no caixa (RF12, RF15): data até hoje, valor maior que zero, espécie e descrição obrigatórias. Sem agendamento é avulso (entrada ou saída); com agendamento é despesa do evento, sempre saída, e não pode ser em agendamento cancelado. Despesa não conta como pagamento do cliente nem é devolvida no cancelamento.
+- **RN34** – Suprimento (dinheiro colocado no caixa, ex.: troco) e sangria (dinheiro retirado, ex.: depósito no banco) só movimentam o caixa: não são receita nem despesa, não se ligam a evento e não entram no "Recebido". Não se estornam: suprimento errado se corrige com uma sangria do mesmo valor, e saída avulsa errada com uma entrada avulsa do mesmo valor.
 
 **Relatórios**
 - **RN31** – Toda geração de relatório (sucesso ou erro) é registrada no `RelatorioLog`. Falha ao gravar o log nunca impede o relatório.
 
-**WhatsApp (pendente: aguarda a decisão sobre o serviço de envio)**
-- **RN29** – No máximo 10 mensagens de WhatsApp enviadas por dia (valor fixo).
-- **RN30** – Falha ou ausência do WhatsApp nunca impede salvar cliente ou agendamento.
+**WhatsApp (18/10/2026: servidor local com Baileys; ver `CLAUDE.md` e `prompt-whatsapp-finalizacao.md`)**
+- **RN29** – Limite de mensagens enviadas por dia, **configurável** em Configurações → WhatsApp (padrão 10, de 1 a 200). Decisão de 18/10/2026: o `ajustes.md` previa 10 fixo; virou o padrão. Mensagem acima do limite fica com falha, para reenviar outro dia.
+- **RN30** – Falha ou ausência do WhatsApp nunca impede salvar cliente, agendamento, faturamento ou baixa. Sem conexão, a tela de envio explica o estado e oferece "Copiar texto".
+- **RN35** – Só recebe mensagem o cliente que aceita (CLIENTE.ACEITA_WHATSAPP, marcado por padrão, desmarcável no cadastro; LGPD) e tem telefone válido (DDD existente; celular de 9 dígitos começa com 9). Toda mensagem é revisada e confirmada por ela antes de sair; nada é enviado sozinho. Envio em fila, um por vez, com intervalo aleatório de 6 a 15 s.
 
 ### Requisitos Funcionais (RF)
 
@@ -395,7 +401,7 @@ Senha=masterkey
 - **RF13** – Consultar contas a receber e dar baixa em parcelas, com juros, multa e baixa parcial.
 - **RF14** – Estornar baixa de parcela e pagamento à vista/sinal.
 - **RF15** – Consultar o caixa e fazer lançamentos avulsos.
-- **RF16** – Mostrar o lucro do evento (receita − custos dos adicionais − despesas).
+- **RF16** – Mostrar o lucro do evento (receita − custos dos adicionais − despesas). Aparece no popup do agendamento faturado e no relatório de faturamento (colunas Custos e Lucro). Despesas = saídas do caixa ligadas ao evento que não são estorno nem devolução.
 - **RF17** – Relatório de agendamentos por período, cliente, status e serviço, em PDF e XLSX.
 - **RF18** – Relatório de caixa por cliente (por período), em PDF e XLSX.
 - **RF19** – Gerar catálogo em PDF com os preços atuais (cartão em Relatórios e lista de Serviços).
@@ -405,7 +411,7 @@ Senha=masterkey
 - **RF23** – Tela de abertura (splash) com a marca do sistema (logo da UnC + Fest Agenda), progresso do carregamento e tratamento de erro de conexão.
 - **RF24** – Calendário nas visões Mês, Semana e Dia.
 - **RF25** – Relatório de faturamento por período, em PDF e XLSX.
-- **RF26 a RF30** (pendentes, WhatsApp) – Conectar o WhatsApp por QR code, ver o estado e desconectar (RF26); histórico de envios (RF27); enviar catálogo ao cliente (RF28); enviar orçamento (RF29); oferecer o envio ao salvar o orçamento (RF30).
+- **RF26 a RF30** (WhatsApp, 18/10/2026) – Conectar o WhatsApp por QR code, ver o estado e desconectar, em Configurações → WhatsApp (RF26); histórico de envios com reenvio das falhas, na mesma aba (RF27); enviar catálogo ao cliente, por Relatórios → Catálogo ou pelo menu do cliente (RF28); enviar o resumo do orçamento/agendamento pelo popup do agendamento (RF29); oferecer o envio ao salvar o orçamento (RF30). Textos editáveis com variáveis ({cliente}, {data}, {valor}...). Cobrança de parcela e lembretes ficaram para depois.
 
 ### Requisitos Não Funcionais (RNF)
 
@@ -418,7 +424,7 @@ Senha=masterkey
 - **RNF07** – Só a conexão com o banco no `config.ini`; parâmetros de negócio, dados da empresa, logo e tema no banco.
 - **RNF08** – Interface em português, com formatos brasileiros (dd/mm/aaaa, R$).
 - **RNF09** – Monousuário, sem login na v1.
-- **RNF10** – PDF gerado localmente com QuestPDF, sem depender de internet.
+- **RNF10** – PDF gerado localmente com QuestPDF, sem depender de internet. O sistema inteiro funciona sem internet e sem WhatsApp; só o envio de mensagens precisa deles.
 - **RNF11** – Código versionado em Git.
 - **RNF12** – Cores da interface definidas em dicionários de recursos por tema (`DynamicResource`), sem cor fixa nas telas.
 - **RNF13** – Interface adaptável ao tamanho da janela (navbar recolhível), com tamanho mínimo de cerca de 1024×640.
@@ -427,7 +433,7 @@ Senha=masterkey
 - **RNF16** – Atualizar e desinstalar nunca apagam o banco, os arquivos, o log nem o `config.ini`.
 - **RNF17** – Campos com limite de tamanho (igual ao VARCHAR do banco), máscara e validação de entrada: a digitação inválida é bloqueada (inclusive na colagem); no banco ficam só os dígitos.
 - **RNF18** – Exportação XLSX com ClosedXML (MIT).
-- **RNF19** (pendente, WhatsApp) – Serviço de WhatsApp local, só em 127.0.0.1.
+- **RNF19** – Serviço de WhatsApp local (Node portátil em `Whatsapp\`), só em 127.0.0.1, com token novo a cada início; iniciado e encerrado pelo sistema (Job Object: não sobra processo nem se o sistema travar). Log em `Log\whatsapp.log` sem texto de mensagem e com telefones mascarados.
 
 > Numeração: o `ajustes.md` chamava os três últimos de RNF14–RNF16, mas esses números já estavam em uso; ficaram RNF17–RNF19.
 
@@ -435,7 +441,8 @@ Senha=masterkey
 
 - [ ] Desenho no Figma das telas restantes: agendamento, faturamento, contas a receber, caixa, relatórios e tema claro.
 - [x] Visões Semana e Dia do calendário: entram na v1 (RF24).
-- [ ] WhatsApp (RF26–RF30, RN29, RN30): o WA-AKG exige servidor MySQL/PostgreSQL e guarda a sessão no banco dele; decidir antes de implementar.
+- [x] WhatsApp (RF26–RF30, RN29, RN30): decidido em 18/10/2026 usar o Baileys (servidor Node local) em vez do WA-AKG, que exigia MySQL/PostgreSQL.
+- [ ] WhatsApp: cobrança de parcela e lembretes (evento e vencimento) ficaram fora desta entrega.
 - [ ] Conferir as condições da licença Community do QuestPDF.
 
 ## Fora do escopo agora (evoluções se ela contratar)

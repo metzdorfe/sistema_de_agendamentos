@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="EspacoFestas.csproj" />
+  <Project Path="FestAgenda.Tests/FestAgenda.Tests.csproj" />
 </Solution>

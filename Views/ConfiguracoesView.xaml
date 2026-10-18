@@ -20,6 +20,7 @@
                 <RadioButton x:Name="AbaEspecies" Style="{StaticResource Aba}" Content="Espécies de pagamento" GroupName="AbasConfig" Click="Aba_Click"/>
                 <RadioButton x:Name="AbaEmpresaBotao" Style="{StaticResource Aba}" Content="Empresa" GroupName="AbasConfig" Click="Aba_Click"/>
                 <RadioButton x:Name="AbaAparencia" Style="{StaticResource Aba}" Content="Aparência" GroupName="AbasConfig" Click="Aba_Click"/>
+                <RadioButton x:Name="AbaWhatsapp" Style="{StaticResource Aba}" Content="WhatsApp" GroupName="AbasConfig" Click="Aba_Click"/>
                 <RadioButton x:Name="AbaSobre" Style="{StaticResource Aba}" Content="Sobre" GroupName="AbasConfig" Click="Aba_Click"/>
             </StackPanel>
         </Border>
@@ -32,7 +33,7 @@
 
                     <CheckBox x:Name="ChkBloqueio" Style="{StaticResource Interruptor}" Content="Um agendamento por dia"/>
                     <TextBlock Style="{StaticResource TextoAuxiliar}" Margin="52,4,0,24"
-                               Text="Com a opção ligada, cada serviço fica bloqueado na data por agendamentos Agendados, Faturados ou Orçamentos com sinal. O bloqueio é por serviço (RN10)."/>
+                               Text="Com a opção ligada, cada serviço fica bloqueado na data por agendamentos Agendados, Faturados ou Orçamentos com sinal. O bloqueio é por serviço."/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -118,7 +119,7 @@
                     <TextBlock Text="Descrição *" Style="{StaticResource TextoRotulo}"/>
                     <TextBox x:Name="TxtEspecieDescricao" Tag="Ex.: Cartão de crédito" MaxLength="80" Margin="0,0,0,20"/>
                     <CheckBox x:Name="ChkParcelamento" Style="{StaticResource Interruptor}" Content="Permite parcelamento"/>
-                    <TextBlock Text="Sem essa opção, a espécie aceita só 1 parcela (RN15)." Style="{StaticResource TextoAuxiliar}" Margin="52,4,0,16"/>
+                    <TextBlock Text="Sem essa opção, a espécie aceita só 1 parcela." Style="{StaticResource TextoAuxiliar}" Margin="52,4,0,16"/>
                     <CheckBox x:Name="ChkEspecieAtiva" Style="{StaticResource Interruptor}" Content="Ativa" IsChecked="True" Margin="0,0,0,24"/>
                     <TextBlock x:Name="TxtMensagemEspecie" Style="{StaticResource TextoErro}" Margin="0,0,0,8"/>
                     <Button Style="{StaticResource BotaoPrincipal}" Content="Salvar espécie" HorizontalAlignment="Stretch" Click="BtnSalvarEspecie_Click"/>
@@ -203,13 +204,13 @@
                         <!-- As miniaturas mostram as cores de cada tema, por isso usam cor fixa -->
                         <RadioButton x:Name="OpcaoClaro" Style="{StaticResource OpcaoCartao}" GroupName="Tema" Margin="8,0" Click="OpcaoTema_Click">
                             <StackPanel>
-                                <Border Height="96" CornerRadius="8" Background="#F7F5FB" BorderBrush="#E4DCEF" BorderThickness="1" ClipToBounds="True">
+                                <Border Height="96" CornerRadius="8" Background="#F7F7F8" BorderBrush="#E4E4E7" BorderThickness="1" ClipToBounds="True">
                                     <Grid>
-                                        <Border Width="36" HorizontalAlignment="Left" Background="#FFFFFF" CornerRadius="8,0,0,8" BorderBrush="#E4DCEF" BorderThickness="0,0,1,0"/>
+                                        <Border Width="36" HorizontalAlignment="Left" Background="#FFFFFF" CornerRadius="8,0,0,8" BorderBrush="#E4E4E7" BorderThickness="0,0,1,0"/>
                                         <StackPanel Margin="48,14,12,0">
-                                            <Border Height="8" Width="64" CornerRadius="4" Background="#1A0B2E" HorizontalAlignment="Left"/>
-                                            <Border Height="30" CornerRadius="6" Background="#FFFFFF" BorderBrush="#E4DCEF" BorderThickness="1" Margin="0,10,0,0"/>
-                                            <Border Height="10" Width="44" CornerRadius="4" Background="#7B2CBF" HorizontalAlignment="Right" Margin="0,8,0,0"/>
+                                            <Border Height="8" Width="64" CornerRadius="4" Background="#1C1B22" HorizontalAlignment="Left"/>
+                                            <Border Height="30" CornerRadius="6" Background="#FFFFFF" BorderBrush="#E4E4E7" BorderThickness="1" Margin="0,10,0,0"/>
+                                            <Border Height="10" Width="44" CornerRadius="4" Background="#6D3FC0" HorizontalAlignment="Right" Margin="0,8,0,0"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -222,13 +223,13 @@
                         </RadioButton>
                         <RadioButton x:Name="OpcaoEscuro" Style="{StaticResource OpcaoCartao}" GroupName="Tema" Margin="8,0" Click="OpcaoTema_Click">
                             <StackPanel>
-                                <Border Height="96" CornerRadius="8" Background="#000000" BorderBrush="#3C096C" BorderThickness="1" ClipToBounds="True">
+                                <Border Height="96" CornerRadius="8" Background="#121214" BorderBrush="#2E2E35" BorderThickness="1" ClipToBounds="True">
                                     <Grid>
-                                        <Border Width="36" HorizontalAlignment="Left" Background="#10002B" CornerRadius="8,0,0,8"/>
+                                        <Border Width="36" HorizontalAlignment="Left" Background="#1B1B1F" CornerRadius="8,0,0,8"/>
                                         <StackPanel Margin="48,14,12,0">
-                                            <Border Height="8" Width="64" CornerRadius="4" Background="#F2EEF7" HorizontalAlignment="Left"/>
-                                            <Border Height="30" CornerRadius="6" Background="#10002B" BorderBrush="#3C096C" BorderThickness="1" Margin="0,10,0,0"/>
-                                            <Border Height="10" Width="44" CornerRadius="4" Background="#7B2CBF" HorizontalAlignment="Right" Margin="0,8,0,0"/>
+                                            <Border Height="8" Width="64" CornerRadius="4" Background="#ECECEF" HorizontalAlignment="Left"/>
+                                            <Border Height="30" CornerRadius="6" Background="#1B1B1F" BorderBrush="#2E2E35" BorderThickness="1" Margin="0,10,0,0"/>
+                                            <Border Height="10" Width="44" CornerRadius="4" Background="#7C5AD9" HorizontalAlignment="Right" Margin="0,8,0,0"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -240,15 +241,15 @@
                         </RadioButton>
                         <RadioButton x:Name="OpcaoSistema" Style="{StaticResource OpcaoCartao}" GroupName="Tema" Margin="8,0" Click="OpcaoTema_Click">
                             <StackPanel>
-                                <Border Height="96" CornerRadius="8" BorderBrush="#A99BB8" BorderThickness="1" ClipToBounds="True">
+                                <Border Height="96" CornerRadius="8" BorderBrush="#CFCFD6" BorderThickness="1" ClipToBounds="True">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition/>
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Background="#F7F5FB" CornerRadius="8,0,0,8"/>
-                                        <Border Grid.Column="1" Background="#000000" CornerRadius="0,8,8,0"/>
-                                        <ctl:Icone Grid.ColumnSpan="2" Dados="{StaticResource IconeSistema}" Foreground="#6B5B7E" Width="32" Height="32"/>
+                                        <Border Background="#F7F7F8" CornerRadius="8,0,0,8"/>
+                                        <Border Grid.Column="1" Background="#121214" CornerRadius="0,8,8,0"/>
+                                        <ctl:Icone Grid.ColumnSpan="2" Dados="{StaticResource IconeSistema}" Foreground="#6B6B76" Width="32" Height="32"/>
                                     </Grid>
                                 </Border>
                                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
@@ -261,6 +262,108 @@
                 </StackPanel>
             </Border>
         </StackPanel>
+
+        <!-- ================================ WhatsApp ================================ -->
+        <ScrollViewer x:Name="PainelWhatsapp" Grid.Row="2" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+            <Border Style="{StaticResource Cartao}" MaxWidth="900" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="32"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- QR code (RF26): borrado quando desligado/desconectado, nítido aguardando a leitura, borrado com check quando conectado.
+                         Preto no branco nos dois temas (é o que o celular lê), por isso cor fixa no fundo. -->
+                    <StackPanel VerticalAlignment="Top">
+                        <Border Width="240" Height="240" CornerRadius="12" Background="#FFFFFF" Padding="12"
+                                BorderBrush="{DynamicResource CorBorda}" BorderThickness="1" ClipToBounds="True">
+                            <Grid>
+                                <Image x:Name="ImgQr" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                                    <Image.Effect>
+                                        <BlurEffect x:Name="BorraoQr" Radius="14" KernelType="Gaussian"/>
+                                    </Image.Effect>
+                                </Image>
+                                <!-- Conectado: check verde por cima do QR borrado -->
+                                <Border x:Name="SeloConectadoQr" Width="88" Height="88" CornerRadius="44" Background="{DynamicResource CorSucesso}"
+                                        Visibility="Collapsed">
+                                    <ctl:Icone Dados="{StaticResource IconeCheck}" Foreground="#FFFFFF" Width="44" Height="44"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <TextBlock x:Name="TxtLegendaQr" Style="{StaticResource TextoAuxiliar}" Width="240" TextAlignment="Center" Margin="0,10,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <DockPanel>
+                            <CheckBox x:Name="ChkWhatsappAtivo" DockPanel.Dock="Right" Style="{StaticResource Interruptor}" Content="Ativo"
+                                      VerticalAlignment="Center" Click="ChkWhatsappAtivo_Click"/>
+                            <StackPanel>
+                                <TextBlock Text="WhatsApp" Style="{StaticResource TextoTituloSecao}" FontSize="18"/>
+                                <TextBlock Style="{StaticResource TextoAuxiliar}" Margin="0,4,0,0"
+                                           Text="Envie catálogo e orçamentos para os clientes pelo WhatsApp do espaço."/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <!-- Estado em texto, não só cor -->
+                        <Border x:Name="SeloEstadoWhatsapp" Style="{StaticResource Selo}" Padding="12,6" Margin="0,20,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="PontoEstado" Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
+                                         Fill="{DynamicResource CorTextoSecundario}"/>
+                                <TextBlock x:Name="TxtEstadoWhatsapp" Text="WhatsApp desligado" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="TxtInstrucaoQr" Style="{StaticResource TextoAuxiliar}" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="20"
+                                   Visibility="Collapsed"
+                                   Text="No celular do espaço, abra o WhatsApp → Configurações → Aparelhos conectados → Conectar um aparelho, e aponte para o QR code."/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <Button x:Name="BtnConectar" Style="{StaticResource BotaoPrincipal}" Content="Conectar" Margin="0,0,8,0" Click="BtnConectar_Click"/>
+                            <Button x:Name="BtnDesconectar" Style="{StaticResource BotaoPerigo}" Content="Desconectar" Click="BtnDesconectar_Click"/>
+                        </StackPanel>
+
+                        <Border Height="1" Background="{DynamicResource CorBorda}" Margin="0,24,0,20"/>
+
+                        <!-- Mensagens padrão e acompanhamento dos envios (popups) -->
+                        <UniformGrid Columns="2" Margin="-6,0">
+                            <Button Margin="6,0" Height="64" HorizontalContentAlignment="Left" Padding="16,0" Click="BtnMensagens_Click"
+                                    ToolTip="Editar os textos padrão do catálogo e do orçamento">
+                                <StackPanel Orientation="Horizontal">
+                                    <ctl:Icone Dados="{StaticResource IconeMensagem}" Foreground="{DynamicResource CorDestaque}" Width="22" Height="22"/>
+                                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Mensagens" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Textos padrão" Style="{StaticResource TextoAuxiliar}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Button>
+                            <Button Margin="6,0" Height="64" HorizontalContentAlignment="Left" Padding="16,0" Click="BtnEnvios_Click"
+                                    ToolTip="Ver o que foi enviado e reenviar o que falhou">
+                                <StackPanel Orientation="Horizontal">
+                                    <ctl:Icone Dados="{StaticResource IconeEnvios}" Foreground="{DynamicResource CorDestaque}" Width="22" Height="22"/>
+                                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Envios" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="TxtResumoEnvios" Text="Acompanhar envios" Style="{StaticResource TextoAuxiliar}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Button>
+                        </UniformGrid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                            <StackPanel Width="190">
+                                <TextBlock Text="Limite de mensagens por dia" Style="{StaticResource TextoRotulo}"/>
+                                <TextBox x:Name="TxtLimiteDiario" Style="{StaticResource CampoValor}" ctl:Mascara.Tipo="Inteiro" ctl:Mascara.Maximo="200"/>
+                            </StackPanel>
+                            <Button Content="Salvar" Margin="8,0,0,0" VerticalAlignment="Bottom" Click="BtnSalvarLimite_Click"/>
+                        </StackPanel>
+                        <TextBlock x:Name="TxtMensagemWhatsapp" Style="{StaticResource TextoErro}" FontSize="13" Margin="0,8,0,0"/>
+
+                        <!-- Risco da biblioteca não oficial: nota discreta, sem caixa -->
+                        <TextBlock Style="{StaticResource TextoAuxiliar}" Opacity="0.65" LineHeight="18" Margin="0,16,0,0"
+                                   Text="A conexão usa uma biblioteca não oficial e o WhatsApp pode bloquear números que enviam muitas mensagens. Use um número só do negócio, envie para quem já é cliente e mantenha o limite baixo."/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </ScrollViewer>
 
         <!-- ================================= Sobre ================================= -->
         <ScrollViewer x:Name="PainelSobre" Grid.Row="2" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">

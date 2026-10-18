@@ -42,6 +42,7 @@ namespace EspacoFestas.Views
             ChkAtivo.IsChecked = cliente.Ativo;
             TxtNome.Text = cliente.Nome;
             TxtTelefone.Text = cliente.Telefone;
+            ChkAceitaWhatsapp.IsChecked = cliente.AceitaWhatsapp;
             TxtCpfCnpj.Text = cliente.CpfCnpj;
             TxtEmail.Text = cliente.Email;
             TxtLogradouro.Text = cliente.Logradouro;
@@ -65,7 +66,7 @@ namespace EspacoFestas.Views
             using var contexto = App.CriarContexto();
             if (cpfCnpj is not null && contexto.Clientes.Any(c => c.CpfCnpj == cpfCnpj && c.Id != _id))
             {
-                TxtMensagem.Text = "Já existe outro cliente com esse CPF/CNPJ (RN01).";
+                TxtMensagem.Text = "Já existe outro cliente com esse CPF/CNPJ.";
                 return;
             }
 
@@ -83,6 +84,7 @@ namespace EspacoFestas.Views
 
             cliente.Nome = TxtNome.Text.Trim();
             cliente.Telefone = Documentos.SoDigitos(TxtTelefone.Text);
+            cliente.AceitaWhatsapp = ChkAceitaWhatsapp.IsChecked == true;
             cliente.CpfCnpj = cpfCnpj;
             cliente.Email = TextoOuNulo(TxtEmail.Text);
             cliente.Logradouro = TextoOuNulo(TxtLogradouro.Text);
@@ -114,7 +116,7 @@ namespace EspacoFestas.Views
 
             if (cpfCnpj is not null && (cpfCnpj.Length is not (11 or 14) || !Documentos.CpfCnpjValido(cpfCnpj)))
             {
-                return "CPF ou CNPJ inválido (RN01).";
+                return "CPF ou CNPJ inválido.";
             }
 
             var email = TxtEmail.Text.Trim();
@@ -139,7 +141,7 @@ namespace EspacoFestas.Views
             Estilo.SetErro(TxtCpfCnpj, invalido);
             if (invalido)
             {
-                TxtMensagem.Text = "CPF ou CNPJ inválido (RN01).";
+                TxtMensagem.Text = "CPF ou CNPJ inválido.";
             }
         }
 

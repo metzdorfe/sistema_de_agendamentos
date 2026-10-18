@@ -35,7 +35,7 @@ namespace EspacoFestas.Views
             TxtVencimento.Text = Formatos.Data(_calculo.Vencimento);
             TxtValorParcela.Text = Formatos.Moeda(_calculo.ValorParcela);
             TxtRegraJuros.Text = $"Em atraso: multa de {Formatos.Decimal(App.Sistema.PercentualMulta)}% e juros de " +
-                                 $"{Formatos.Decimal(App.Sistema.PercentualJurosMes)}% ao mês, por dia (RN18). Os valores podem ser ajustados.";
+                                 $"{Formatos.Decimal(App.Sistema.PercentualJurosMes)}% ao mês, por dia. Os valores podem ser ajustados.";
 
             using (var contexto = App.CriarContexto())
             {

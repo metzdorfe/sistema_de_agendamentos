@@ -6,7 +6,7 @@
 #   Assets/Brand/unc_marca.png       símbolo + "UNC" (quadrado), navbar e Sobre
 #   Assets/Brand/unc_simbolo.png     só o símbolo, para tamanhos pequenos
 #   Assets/Brand/*_branca.png        as mesmas três em branco (tema escuro e splash)
-#   Assets/Icons/app.ico             16, 32, 48 e 256 px: marca branca sobre quadrado arredondado roxo #7B2CBF
+#   Assets/Icons/app.ico             16, 32, 48 e 256 px: marca branca sobre quadrado arredondado roxo #6D3FC0
 #   Assets/Splash/splash.png         imagem estática da splash (mesmo visual da SplashWindow: escura, logo branca)
 #   Installer/Imagens/*.bmp          imagens do assistente do instalador (lateral e topo), 100%/150%/200%
 #
@@ -141,7 +141,7 @@ $frames = @(
     @{ Tamanho = 48;  Fonte = $marcaBranca;   Margem = 7 },
     @{ Tamanho = 256; Fonte = $marcaBranca;   Margem = 40 }
 )
-$roxo = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(0x7B, 0x2C, 0xBF))
+$roxo = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(0x6D, 0x3F, 0xC0))
 $roxo.Freeze()
 
 # Fundo roxo de cantos arredondados (raio ~22% do lado) + imagem centralizada por cima
@@ -211,26 +211,26 @@ $fonteMarca = $pastaFontes + '#Pacifico'
 $uriLogo = (Join-Path $brand 'unc_logo_branca.png') -replace '\\', '/'
 $xaml = @"
 <Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Width="560" Height="340">
-  <Border CornerRadius="16" Background="#10002B" BorderBrush="#3C096C" BorderThickness="1" ClipToBounds="True">
+  <Border CornerRadius="16" Background="#1B1B1F" BorderBrush="#2E2E35" BorderThickness="1" ClipToBounds="True">
     <Grid>
       <Canvas>
-        <Ellipse Canvas.Left="474" Canvas.Top="30" Width="14" Height="14" Fill="#7B2CBF"/>
-        <Ellipse Canvas.Left="508" Canvas.Top="68" Width="8" Height="8" Fill="#D6A24A"/>
-        <Ellipse Canvas.Left="440" Canvas.Top="70" Width="6" Height="6" Fill="#C77DFF"/>
-        <Rectangle Canvas.Left="500" Canvas.Top="22" Width="18" Height="6" RadiusX="3" RadiusY="3" Fill="#C77DFF"><Rectangle.RenderTransform><RotateTransform Angle="35"/></Rectangle.RenderTransform></Rectangle>
-        <Rectangle Canvas.Left="452" Canvas.Top="104" Width="14" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#5FB98A"><Rectangle.RenderTransform><RotateTransform Angle="-25"/></Rectangle.RenderTransform></Rectangle>
-        <Rectangle Canvas.Left="520" Canvas.Top="112" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7B2CBF"><Rectangle.RenderTransform><RotateTransform Angle="60"/></Rectangle.RenderTransform></Rectangle>
-        <Ellipse Canvas.Left="40" Canvas.Top="232" Width="12" Height="12" Fill="#D6A24A"/>
-        <Ellipse Canvas.Left="78" Canvas.Top="268" Width="7" Height="7" Fill="#7B2CBF"/>
-        <Ellipse Canvas.Left="26" Canvas.Top="282" Width="6" Height="6" Fill="#5FB98A"/>
-        <Rectangle Canvas.Left="62" Canvas.Top="222" Width="16" Height="6" RadiusX="3" RadiusY="3" Fill="#C77DFF"><Rectangle.RenderTransform><RotateTransform Angle="-40"/></Rectangle.RenderTransform></Rectangle>
-        <Rectangle Canvas.Left="100" Canvas.Top="246" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7B2CBF"><Rectangle.RenderTransform><RotateTransform Angle="20"/></Rectangle.RenderTransform></Rectangle>
+        <Ellipse Canvas.Left="474" Canvas.Top="30" Width="14" Height="14" Fill="#7C5AD9"/>
+        <Ellipse Canvas.Left="508" Canvas.Top="68" Width="8" Height="8" Fill="#E0A94F"/>
+        <Ellipse Canvas.Left="440" Canvas.Top="70" Width="6" Height="6" Fill="#B5A0F0"/>
+        <Rectangle Canvas.Left="500" Canvas.Top="22" Width="18" Height="6" RadiusX="3" RadiusY="3" Fill="#B5A0F0"><Rectangle.RenderTransform><RotateTransform Angle="35"/></Rectangle.RenderTransform></Rectangle>
+        <Rectangle Canvas.Left="452" Canvas.Top="104" Width="14" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#5CC98A"><Rectangle.RenderTransform><RotateTransform Angle="-25"/></Rectangle.RenderTransform></Rectangle>
+        <Rectangle Canvas.Left="520" Canvas.Top="112" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7C5AD9"><Rectangle.RenderTransform><RotateTransform Angle="60"/></Rectangle.RenderTransform></Rectangle>
+        <Ellipse Canvas.Left="40" Canvas.Top="232" Width="12" Height="12" Fill="#E0A94F"/>
+        <Ellipse Canvas.Left="78" Canvas.Top="268" Width="7" Height="7" Fill="#7C5AD9"/>
+        <Ellipse Canvas.Left="26" Canvas.Top="282" Width="6" Height="6" Fill="#5CC98A"/>
+        <Rectangle Canvas.Left="62" Canvas.Top="222" Width="16" Height="6" RadiusX="3" RadiusY="3" Fill="#B5A0F0"><Rectangle.RenderTransform><RotateTransform Angle="-40"/></Rectangle.RenderTransform></Rectangle>
+        <Rectangle Canvas.Left="100" Canvas.Top="246" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7C5AD9"><Rectangle.RenderTransform><RotateTransform Angle="20"/></Rectangle.RenderTransform></Rectangle>
       </Canvas>
       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,24">
-        <TextBlock Text="Fest Agenda" FontFamily="$fonteMarca" FontSize="52" Foreground="#F2EEF7" HorizontalAlignment="Center"/>
-        <TextBlock Text="AGENDA DE FESTAS E EVENTOS" FontFamily="$fonte" FontSize="11" FontWeight="SemiBold" Foreground="#C77DFF" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+        <TextBlock Text="Fest Agenda" FontFamily="$fonteMarca" FontSize="52" Foreground="#ECECEF" HorizontalAlignment="Center"/>
+        <TextBlock Text="AGENDA DE FESTAS E EVENTOS" FontFamily="$fonte" FontSize="11" FontWeight="SemiBold" Foreground="#B5A0F0" HorizontalAlignment="Center" Margin="0,2,0,0"/>
         <StackPanel Margin="0,28,0,0" Width="240">
-          <Border Height="4" CornerRadius="2" Background="#2A0A4F"/>
+          <Border Height="4" CornerRadius="2" Background="#2E2E35"/>
           <TextBlock Text=" " FontFamily="$fonte" FontSize="12" Margin="0,10,0,0"/>
         </StackPanel>
       </StackPanel>
@@ -252,7 +252,7 @@ Salvar-Png $rtb (Join-Path $raiz 'Assets\Splash\splash.png')
 
 # ---------------------------------------------------------------------------
 # Instalador (Inno Setup): imagem lateral (boas-vindas/conclusão) e do topo das páginas, em BMP 24 bits
-# (o Inno escolhe o tamanho conforme o zoom do Windows). Mesmo visual da splash: roxo escuro, confete, nome em Pacifico.
+# (o Inno escolhe o tamanho conforme o zoom do Windows). Mesmo visual da splash: grafite, confete, nome em Pacifico.
 # ---------------------------------------------------------------------------
 $pastaInstalador = Join-Path $raiz 'Installer\Imagens'
 New-Item -ItemType Directory -Force -Path $pastaInstalador | Out-Null
@@ -269,23 +269,23 @@ function Salvar-Bmp($visual, [int]$largura, [int]$altura, [string]$caminho) {
 
 # Lateral: desenhada em 164x314 e ampliada por escala (vetorial, sem perder nitidez)
 $xamlLateral = @"
-<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Width="164" Height="314" Background="#10002B">
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Width="164" Height="314" Background="#1B1B1F">
   <Canvas>
-    <Ellipse Canvas.Left="118" Canvas.Top="22" Width="10" Height="10" Fill="#7B2CBF"/>
-    <Ellipse Canvas.Left="142" Canvas.Top="50" Width="6" Height="6" Fill="#D6A24A"/>
-    <Ellipse Canvas.Left="100" Canvas.Top="52" Width="5" Height="5" Fill="#C77DFF"/>
-    <Rectangle Canvas.Left="136" Canvas.Top="16" Width="14" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#C77DFF"><Rectangle.RenderTransform><RotateTransform Angle="35"/></Rectangle.RenderTransform></Rectangle>
-    <Rectangle Canvas.Left="112" Canvas.Top="78" Width="11" Height="4" RadiusX="2" RadiusY="2" Fill="#5FB98A"><Rectangle.RenderTransform><RotateTransform Angle="-25"/></Rectangle.RenderTransform></Rectangle>
-    <Ellipse Canvas.Left="18" Canvas.Top="240" Width="9" Height="9" Fill="#D6A24A"/>
-    <Ellipse Canvas.Left="44" Canvas.Top="262" Width="5" Height="5" Fill="#7B2CBF"/>
-    <Ellipse Canvas.Left="12" Canvas.Top="268" Width="5" Height="5" Fill="#5FB98A"/>
-    <Rectangle Canvas.Left="30" Canvas.Top="236" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#C77DFF"><Rectangle.RenderTransform><RotateTransform Angle="-40"/></Rectangle.RenderTransform></Rectangle>
-    <Rectangle Canvas.Left="60" Canvas.Top="250" Width="10" Height="4" RadiusX="2" RadiusY="2" Fill="#7B2CBF"><Rectangle.RenderTransform><RotateTransform Angle="20"/></Rectangle.RenderTransform></Rectangle>
+    <Ellipse Canvas.Left="118" Canvas.Top="22" Width="10" Height="10" Fill="#7C5AD9"/>
+    <Ellipse Canvas.Left="142" Canvas.Top="50" Width="6" Height="6" Fill="#E0A94F"/>
+    <Ellipse Canvas.Left="100" Canvas.Top="52" Width="5" Height="5" Fill="#B5A0F0"/>
+    <Rectangle Canvas.Left="136" Canvas.Top="16" Width="14" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#B5A0F0"><Rectangle.RenderTransform><RotateTransform Angle="35"/></Rectangle.RenderTransform></Rectangle>
+    <Rectangle Canvas.Left="112" Canvas.Top="78" Width="11" Height="4" RadiusX="2" RadiusY="2" Fill="#5CC98A"><Rectangle.RenderTransform><RotateTransform Angle="-25"/></Rectangle.RenderTransform></Rectangle>
+    <Ellipse Canvas.Left="18" Canvas.Top="240" Width="9" Height="9" Fill="#E0A94F"/>
+    <Ellipse Canvas.Left="44" Canvas.Top="262" Width="5" Height="5" Fill="#7C5AD9"/>
+    <Ellipse Canvas.Left="12" Canvas.Top="268" Width="5" Height="5" Fill="#5CC98A"/>
+    <Rectangle Canvas.Left="30" Canvas.Top="236" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#B5A0F0"><Rectangle.RenderTransform><RotateTransform Angle="-40"/></Rectangle.RenderTransform></Rectangle>
+    <Rectangle Canvas.Left="60" Canvas.Top="250" Width="10" Height="4" RadiusX="2" RadiusY="2" Fill="#7C5AD9"><Rectangle.RenderTransform><RotateTransform Angle="20"/></Rectangle.RenderTransform></Rectangle>
   </Canvas>
   <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,20">
-    <TextBlock Text="Fest" FontFamily="$fonteMarca" FontSize="40" Foreground="#F2EEF7" HorizontalAlignment="Center"/>
-    <TextBlock Text="Agenda" FontFamily="$fonteMarca" FontSize="40" Foreground="#F2EEF7" HorizontalAlignment="Center" Margin="0,-22,0,0"/>
-    <TextBlock Text="FESTAS E EVENTOS" FontFamily="$fonte" FontSize="8" FontWeight="SemiBold" Foreground="#C77DFF" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+    <TextBlock Text="Fest" FontFamily="$fonteMarca" FontSize="40" Foreground="#ECECEF" HorizontalAlignment="Center"/>
+    <TextBlock Text="Agenda" FontFamily="$fonteMarca" FontSize="40" Foreground="#ECECEF" HorizontalAlignment="Center" Margin="0,-22,0,0"/>
+    <TextBlock Text="FESTAS E EVENTOS" FontFamily="$fonte" FontSize="8" FontWeight="SemiBold" Foreground="#B5A0F0" HorizontalAlignment="Center" Margin="0,4,0,0"/>
   </StackPanel>
   <Image Source="file:///$uriLogo" Height="16" Stretch="Uniform" Opacity="0.75" RenderOptions.BitmapScalingMode="HighQuality"
          HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,14"/>

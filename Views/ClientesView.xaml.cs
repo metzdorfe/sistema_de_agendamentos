@@ -89,16 +89,32 @@ namespace EspacoFestas.Views
             var ativar = new MenuItem { Header = linha.Ativo ? "Inativar" : "Ativar" };
             ativar.Click += (_, _) => AlternarAtivo(linha);
 
+            // RF28: catálogo pelo WhatsApp
+            var catalogo = new MenuItem { Header = "Enviar catálogo pelo WhatsApp" };
+            Estilo.SetIcone(catalogo, (System.Windows.Media.Geometry)FindResource("IconeCatalogo"));
+            catalogo.Click += (_, _) => EnviarCatalogo(linha);
+
             var menu = new ContextMenu { PlacementTarget = botao, Placement = PlacementMode.Bottom };
             menu.Items.Add(editar);
+            menu.Items.Add(catalogo);
             menu.Items.Add(ativar);
             menu.IsOpen = true;
+        }
+
+        private static void EnviarCatalogo(ClienteLinha linha)
+        {
+            var janela = EnvioWhatsappWindow.Catalogo(linha.Id);
+            MainWindow.Atual.MostrarModal(janela);
+            if (janela.Enviou)
+            {
+                Dialogo.Avisar("Catálogo enviado", $"O catálogo foi enviado para {linha.Nome} pelo WhatsApp.");
+            }
         }
 
         private void AlternarAtivo(ClienteLinha linha)
         {
             if (linha.Ativo && !Dialogo.Confirmar("Inativar cliente",
-                    $"{linha.Nome} não vai mais aparecer para novos agendamentos. O histórico é mantido (RN02).", "Inativar"))
+                    $"{linha.Nome} não vai mais aparecer para novos agendamentos. O histórico é mantido.", "Inativar"))
             {
                 return;
             }

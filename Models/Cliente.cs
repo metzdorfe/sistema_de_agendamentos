@@ -16,6 +16,8 @@ public class Cliente
     public string? Cep { get; set; }
     public DateTime DataCadastro { get; set; } = DateTime.Today;
     public bool Ativo { get; set; } = true;
+    /// <summary>Consentimento para receber mensagens pelo WhatsApp (LGPD).</summary>
+    public bool AceitaWhatsapp { get; set; } = true;
 
     public ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
 }

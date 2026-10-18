@@ -1,23 +1,24 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Tema escuro. Mesmas chaves do Light.xaml, cores diferentes (ver .claude/design-interface.md).
-         Paleta roxa: profundidade por tom (#000000 → #10002B → #240046) e borda fina; sem sombra, sem glow, sem gradiente.
-         A navbar usa CorSuperficie, então fica escura junto com o tema. -->
+    <!-- Tema escuro. Mesmas chaves do Light.xaml, cores diferentes.
+         Grafite neutro (sem fundo roxo); profundidade por tom (#121214 → #1B1B1F → #26262B) e borda fina.
+         O roxo da marca, mais claro para ter contraste, fica no que é ação ou destaque. -->
 
-    <SolidColorBrush x:Key="CorFundo" Color="#000000"/>
-    <SolidColorBrush x:Key="CorSuperficie" Color="#10002B"/>
-    <SolidColorBrush x:Key="CorSuperficieElevada" Color="#240046"/>
-    <SolidColorBrush x:Key="CorBorda" Color="#3C096C"/>
-    <SolidColorBrush x:Key="CorBotaoSecundario" Color="#5A189A"/>
-    <SolidColorBrush x:Key="CorBotaoPrincipal" Color="#7B2CBF"/>
-    <SolidColorBrush x:Key="CorBotaoPrincipalHover" Color="#9D4EDD"/>
-    <SolidColorBrush x:Key="CorFoco" Color="#9D4EDD"/>
-    <SolidColorBrush x:Key="CorDestaque" Color="#C77DFF"/>
-    <SolidColorBrush x:Key="CorEnfase" Color="#C77DFF"/>
-    <SolidColorBrush x:Key="CorTexto" Color="#F2EEF7"/>
-    <SolidColorBrush x:Key="CorTextoSecundario" Color="#A99BB8"/>
+    <SolidColorBrush x:Key="CorFundo" Color="#121214"/>
+    <SolidColorBrush x:Key="CorSuperficie" Color="#1B1B1F"/>
+    <SolidColorBrush x:Key="CorSuperficieElevada" Color="#26262B"/>
+    <SolidColorBrush x:Key="CorBorda" Color="#2E2E35"/>
+    <SolidColorBrush x:Key="CorBotaoSecundario" Color="#45454E"/>
+    <SolidColorBrush x:Key="CorBotaoPrincipal" Color="#7C5AD9"/>
+    <SolidColorBrush x:Key="CorBotaoPrincipalHover" Color="#8D6FE2"/>
+    <SolidColorBrush x:Key="CorFoco" Color="#9C7AE6"/>
+    <SolidColorBrush x:Key="CorFocoAnel" Color="#4D9C7AE6"/>
+    <SolidColorBrush x:Key="CorDestaque" Color="#B5A0F0"/>
+    <SolidColorBrush x:Key="CorEnfase" Color="#B5A0F0"/>
+    <SolidColorBrush x:Key="CorTexto" Color="#ECECEF"/>
+    <SolidColorBrush x:Key="CorTextoSecundario" Color="#A1A1AA"/>
     <SolidColorBrush x:Key="CorTextoSobrePrincipal" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="CorSelecao" Color="#1C0038"/>
+    <SolidColorBrush x:Key="CorSelecao" Color="#29233A"/>
 
     <!-- Logo da UnC: no escuro, a versão branca -->
     <BitmapImage x:Key="ImagemLogoUnc" UriSource="pack://application:,,,/Assets/Brand/unc_marca_branca.png"/>
@@ -25,15 +26,15 @@
     <!-- Fundo escurecido atrás de janelas modais (popup de agendamento) -->
     <SolidColorBrush x:Key="CorOverlay" Color="#B3000000"/>
 
-    <!-- Status: só onde carregam significado; tons suaves -->
-    <SolidColorBrush x:Key="CorOrcamento" Color="#D6A24A"/>
-    <SolidColorBrush x:Key="CorSucesso" Color="#5FB98A"/>
-    <SolidColorBrush x:Key="CorErro" Color="#E27272"/>
-    <SolidColorBrush x:Key="CorOrcamentoFundo" Color="#26D6A24A"/>
-    <SolidColorBrush x:Key="CorSucessoFundo" Color="#265FB98A"/>
-    <SolidColorBrush x:Key="CorErroFundo" Color="#26E27272"/>
-    <SolidColorBrush x:Key="CorPrincipalFundo" Color="#407B2CBF"/>
+    <!-- Status: só onde carregam significado; tons claros para contraste no escuro -->
+    <SolidColorBrush x:Key="CorOrcamento" Color="#F2B45A"/>
+    <SolidColorBrush x:Key="CorSucesso" Color="#5CC98A"/>
+    <SolidColorBrush x:Key="CorErro" Color="#F27474"/>
+    <SolidColorBrush x:Key="CorOrcamentoFundo" Color="#26F2B45A"/>
+    <SolidColorBrush x:Key="CorSucessoFundo" Color="#265CC98A"/>
+    <SolidColorBrush x:Key="CorErroFundo" Color="#26F27474"/>
+    <SolidColorBrush x:Key="CorPrincipalFundo" Color="#337C5AD9"/>
     <!-- Pílula de orçamento com sinal: âmbar preenchido, texto escuro -->
-    <SolidColorBrush x:Key="CorOrcamentoPreenchido" Color="#D6A24A"/>
-    <SolidColorBrush x:Key="CorTextoSobreOrcamento" Color="#10002B"/>
+    <SolidColorBrush x:Key="CorOrcamentoPreenchido" Color="#E0A94F"/>
+    <SolidColorBrush x:Key="CorTextoSobreOrcamento" Color="#121214"/>
 </ResourceDictionary>

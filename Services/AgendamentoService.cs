@@ -34,6 +34,13 @@ public sealed record AvaliacaoCancelamento(bool Permitido, string? Impedimento, 
     public bool ComDevolucao => DentroDoPrazo && ValorPago > 0;
 }
 
+/// <summary>RF16: lucro do evento = receita − custo dos adicionais − despesas lançadas no caixa.</summary>
+public sealed record LucroEvento(decimal Receita, decimal CustoAdicionais, IReadOnlyList<(DateTime Data, string Descricao, decimal Valor)> Despesas)
+{
+    public decimal TotalDespesas => Despesas.Sum(d => d.Valor);
+    public decimal Lucro => Receita - CustoAdicionais - TotalDespesas;
+}
+
 /// <summary>Regras do agendamento (fluxo-sistema.md, seção 3 e 6).</summary>
 public static class AgendamentoService
 {
@@ -54,7 +61,8 @@ public static class AgendamentoService
                 && (sa.Agendamento.Status == StatusAgendamento.Agendado
                     || sa.Agendamento.Status == StatusAgendamento.Faturado
                     || (sa.Agendamento.Status == StatusAgendamento.Orcamento
-                        && sa.Agendamento.Lancamentos.Any(l => l.Tipo == TipoLancamento.Entrada))))
+                        && sa.Agendamento.Lancamentos.Any(l => l.Tipo == TipoLancamento.Entrada
+                            && !contexto.Financeiros.Any(e => e.LancamentoEstornadoId == l.Id)))))
             .Select(sa => sa.ServicoId)
             .Distinct()
             .ToHashSet();
@@ -65,7 +73,7 @@ public static class AgendamentoService
     {
         if (dados.Servicos.Count == 0)
         {
-            throw new RegraNegocioException("Servicos", "Adicione pelo menos um serviço (RN05).");
+            throw new RegraNegocioException("Servicos", "Adicione pelo menos um serviço.");
         }
 
         using var contexto = App.CriarContexto();
@@ -91,8 +99,24 @@ public static class AgendamentoService
             }
         }
 
+        // O cliente nunca paga mais que o total: o sinal novo cabe no que falta, e o total não fica menor que o já pago
+        decimal total = CalcularTotal(dados.Servicos.Sum(s => s.Valor), dados.Adicionais.Sum(a => a.Quantidade * a.Valor), dados.ValorDesconto);
+        decimal pago = id is null ? 0 : ValorPago(contexto, id.Value);
+        if (pago > total)
+        {
+            throw new RegraNegocioException("Geral",
+                $"Não é possível salvar: o total ({Formatos.Moeda(total)}) ficaria menor que o valor já pago pelo cliente ({Formatos.Moeda(pago)}).");
+        }
+
+        if (dados.ValorSinal > total - pago)
+        {
+            throw new RegraNegocioException("Sinal",
+                $"Não é possível lançar esse sinal: ele passa do valor que falta pagar ({Formatos.Moeda(total - pago)}).");
+        }
+
         bool temSinal = dados.ValorSinal > 0
-            || (id is not null && contexto.Financeiros.Any(f => f.AgendamentoId == id && f.Tipo == TipoLancamento.Entrada));
+            || (id is not null && contexto.Financeiros.Any(f => f.AgendamentoId == id && f.Tipo == TipoLancamento.Entrada
+                && !contexto.Financeiros.Any(e => e.LancamentoEstornadoId == f.Id)));
         bool bloqueiaData = status is StatusAgendamento.Agendado or StatusAgendamento.Faturado
             || (status == StatusAgendamento.Orcamento && temSinal);
 
@@ -105,7 +129,7 @@ public static class AgendamentoService
             {
                 var nomes = contexto.Servicos.Where(s => conflito.Contains(s.Id)).Select(s => s.Nome).ToList();
                 throw new RegraNegocioException("Servicos",
-                    $"{string.Join(", ", nomes)} já está reservado em {Formatos.Data(dados.DataEvento)} (um agendamento por dia, RN10).");
+                    $"{string.Join(", ", nomes)} já está reservado em {Formatos.Data(dados.DataEvento)} (um agendamento por dia).");
             }
         }
 
@@ -135,8 +159,7 @@ public static class AgendamentoService
             .ToList();
 
         // RN09
-        agendamento.ValorTotal = CalcularTotal(dados.Servicos.Sum(s => s.Valor),
-            dados.Adicionais.Sum(a => a.Quantidade * a.Valor), dados.ValorDesconto);
+        agendamento.ValorTotal = total;
 
         contexto.SaveChanges();
 
@@ -162,7 +185,7 @@ public static class AgendamentoService
     /// <summary>RN09: total = serviços + adicionais − desconto.</summary>
     public static decimal CalcularTotal(decimal servicos, decimal adicionais, decimal desconto) => servicos + adicionais - desconto;
 
-    /// <summary>Valor já pago pelo cliente (sinal, à vista e parcelas baixadas, menos estornos de baixa).</summary>
+    /// <summary>Valor já pago pelo cliente (sinal, à vista e parcelas baixadas, menos estornos e devoluções de cancelamento).</summary>
     public static decimal ValorPago(EspacoFestasContext contexto, int agendamentoId) =>
         PagamentosPorEspecie(contexto, agendamentoId).Sum(p => p.Valor);
 
@@ -173,7 +196,9 @@ public static class AgendamentoService
     public static Dictionary<int, decimal> ValoresPagos(EspacoFestasContext contexto, IQueryable<Agendamento> agendamentos)
     {
         var diretos = contexto.Financeiros.AsNoTracking()
-            .Where(f => f.Tipo == TipoLancamento.Entrada && agendamentos.Any(a => a.Id == f.AgendamentoId))
+            .Where(f => (f.Tipo == TipoLancamento.Entrada || f.LancamentoEstornadoId != null
+                    || (f.Agendamento!.Status == StatusAgendamento.Cancelado && f.Descricao!.StartsWith(PrefixoDevolucao)))
+                && agendamentos.Any(a => a.Id == f.AgendamentoId))
             .Select(f => new { Id = f.AgendamentoId!.Value, f.Tipo, f.Valor })
             .ToList();
         var parcelas = contexto.Financeiros.AsNoTracking()
@@ -184,6 +209,26 @@ public static class AgendamentoService
         return diretos.Concat(parcelas)
             .GroupBy(f => f.Id)
             .ToDictionary(g => g.Key, g => g.Sum(f => f.Tipo == TipoLancamento.Entrada ? f.Valor : -f.Valor));
+    }
+
+    /// <summary>
+    /// RF16: receita (total do evento, com desconto), custo dos adicionais (gravado no lançamento, RN08) e despesas do evento
+    /// (saídas ligadas ao agendamento que não são estorno nem devolução).
+    /// </summary>
+    public static LucroEvento CalcularLucro(EspacoFestasContext contexto, int agendamentoId)
+    {
+        var receita = contexto.Agendamentos.Where(a => a.Id == agendamentoId).Select(a => a.ValorTotal).Single();
+        var custo = contexto.AdicionalAgendamentos.Where(a => a.AgendamentoId == agendamentoId)
+            .Sum(a => (decimal?)(a.Quantidade * a.ValorCustoUnitario)) ?? 0;
+        var despesas = contexto.Financeiros.AsNoTracking()
+            .Where(f => f.AgendamentoId == agendamentoId && f.Tipo == TipoLancamento.Saida && f.LancamentoEstornadoId == null
+                && !(f.Agendamento!.Status == StatusAgendamento.Cancelado && f.Descricao!.StartsWith(PrefixoDevolucao)))
+            .OrderBy(f => f.DataLancamento).ThenBy(f => f.Id)
+            .Select(f => new { f.DataLancamento, f.Descricao, f.Valor })
+            .AsEnumerable()
+            .Select(f => (f.DataLancamento, f.Descricao ?? "Despesa", f.Valor))
+            .ToList();
+        return new LucroEvento(receita, custo, despesas);
     }
 
     public static AvaliacaoCancelamento AvaliarCancelamento(int agendamentoId)
@@ -200,7 +245,7 @@ public static class AgendamentoService
         // RN27: só até a data do evento, inclusive
         if (dias < 0)
         {
-            return new AvaliacaoCancelamento(false, "O cancelamento só pode ser feito até a data do evento (RN27).", 0, false, 0, dias);
+            return new AvaliacaoCancelamento(false, "O cancelamento só pode ser feito até a data do evento.", 0, false, 0, dias);
         }
 
         int abertas = contexto.Recebers.Count(r => r.AgendamentoId == agendamentoId && r.Status == StatusReceber.Aberto);
@@ -227,19 +272,28 @@ public static class AgendamentoService
             parcela.Status = StatusReceber.Cancelado;
         }
 
-        // RN24: dentro do prazo, devolve tudo que foi pago (sinal e parcelas), como saída ligada ao agendamento
+        // RN24: dentro do prazo, devolve tudo que foi pago (sinal e parcelas): uma saída para cada entrada ainda não
+        // estornada, na mesma espécie e com a mesma origem, apontando para ela (como o estorno). Assim a devolução
+        // nunca se confunde com despesa do evento.
         if (avaliacao.ComDevolucao)
         {
-            foreach (var (especieId, valor) in PagamentosPorEspecie(contexto, agendamentoId).Where(p => p.Valor > 0))
+            var entradas = contexto.Financeiros
+                .Where(f => f.Tipo == TipoLancamento.Entrada
+                    && (f.AgendamentoId == agendamentoId || (f.Receber != null && f.Receber.AgendamentoId == agendamentoId))
+                    && !contexto.Financeiros.Any(e => e.LancamentoEstornadoId == f.Id))
+                .ToList();
+            foreach (var entrada in entradas)
             {
                 contexto.Financeiros.Add(new Financeiro
                 {
                     DataLancamento = DateTime.Today,
                     Tipo = TipoLancamento.Saida,
-                    Valor = valor,
-                    EspecieId = especieId,
-                    AgendamentoId = agendamentoId,
-                    Descricao = Limitar($"Devolução por cancelamento – {agendamento.Titulo}", 200)
+                    Valor = entrada.Valor,
+                    EspecieId = entrada.EspecieId,
+                    AgendamentoId = entrada.AgendamentoId,
+                    ReceberId = entrada.ReceberId,
+                    LancamentoEstornadoId = entrada.Id,
+                    Descricao = Limitar($"{PrefixoDevolucao}{agendamento.Titulo}", 200)
                 });
             }
         }
@@ -252,18 +306,26 @@ public static class AgendamentoService
     }
 
     /// <summary>
-    /// Pago por espécie: entradas ligadas ao agendamento (sinal, à vista) + baixas de parcelas dele, menos estornos de baixa.
-    /// Saídas ligadas direto ao agendamento não entram: podem ser despesas do evento (ex.: garçom), não devolução.
+    /// Pago por espécie: entradas ligadas ao agendamento (sinal, à vista) + baixas de parcelas dele, menos estornos
+    /// e devoluções (saídas que apontam para a entrada). Outras saídas ligadas ao agendamento são despesas do evento
+    /// (ex.: garçom) e não entram.
     /// </summary>
     private static List<(int EspecieId, decimal Valor)> PagamentosPorEspecie(EspacoFestasContext contexto, int agendamentoId) =>
         contexto.Financeiros.AsNoTracking()
-            .Where(f => (f.AgendamentoId == agendamentoId && f.Tipo == TipoLancamento.Entrada)
+            .Where(f => (f.AgendamentoId == agendamentoId && (f.Tipo == TipoLancamento.Entrada || f.LancamentoEstornadoId != null
+                    || (f.Agendamento!.Status == StatusAgendamento.Cancelado && f.Descricao!.StartsWith(PrefixoDevolucao))))
                 || (f.Receber != null && f.Receber.AgendamentoId == agendamentoId))
             .Select(f => new { f.EspecieId, f.Tipo, f.Valor })
             .AsEnumerable()
             .GroupBy(f => f.EspecieId)
             .Select(g => (g.Key, g.Sum(f => f.Tipo == TipoLancamento.Entrada ? f.Valor : -f.Valor)))
             .ToList();
+
+    /// <summary>
+    /// Início da descrição da devolução por cancelamento. Devoluções gravadas antes de 18/10/2026 não apontam para a
+    /// entrada (LANCAMENTO_ESTORNADO_ID vazio) e são reconhecidas por esse texto no agendamento cancelado.
+    /// </summary>
+    private const string PrefixoDevolucao = "Devolução por cancelamento – ";
 
     private static string Limitar(string texto, int tamanho) => texto.Length <= tamanho ? texto : texto[..tamanho];
 }

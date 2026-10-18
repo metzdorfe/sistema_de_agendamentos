@@ -1,14 +1,20 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using System.Windows.Threading;
 using EspacoFestas.Models;
 using EspacoFestas.Services;
+using EspacoFestas.Services.Whatsapp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
+using QRCoder;
 
 namespace EspacoFestas.Views
 {
     /// <summary>
-    /// Configurações (RF20, RF21): parâmetros, espécies, empresa, aparência e sobre.
+    /// Configurações (RF20, RF21, RF26, RF27): parâmetros, espécies, empresa, aparência, WhatsApp e sobre.
     /// Tudo gravado na tabela CONFIGURACAO, exceto as espécies, que têm tabela própria.
     /// </summary>
     public partial class ConfiguracoesView : UserControl
@@ -17,7 +23,12 @@ namespace EspacoFestas.Views
         public const int AbaEspeciesIndice = 1;
         public const int AbaEmpresa = 2;
         public const int AbaAparenciaIndice = 3;
-        public const int AbaSobreIndice = 4;
+        public const int AbaWhatsappIndice = 4;
+        public const int AbaSobreIndice = 5;
+
+        /// <summary>Enquanto a aba WhatsApp está aberta e não conectou, consulta o estado (e o QR) a cada 2 s.</summary>
+        private readonly DispatcherTimer _consultaWhatsapp = new() { Interval = TimeSpan.FromSeconds(2) };
+        private string? _qrMostrado;
 
         /// <summary>Logo gravada hoje (caminho relativo a Arquivos\).</summary>
         private string? _caminhoLogo;
@@ -33,13 +44,15 @@ namespace EspacoFestas.Views
             TxtVersao.Text = $"Versão {App.Versao.TrimStart('v')}";
             TxtVersaoDetalhe.Text = App.Versao.TrimStart('v');
             CarregarConfiguracao();
+            _consultaWhatsapp.Tick += async (_, _) => await AtualizarEstadoWhatsappAsync();
+            Unloaded += (_, _) => _consultaWhatsapp.Stop();
             MostrarAba(aba);
         }
 
         private void MostrarAba(int aba)
         {
-            var abas = new RadioButton[] { AbaParametros, AbaEspecies, AbaEmpresaBotao, AbaAparencia, AbaSobre };
-            var paineis = new FrameworkElement[] { PainelParametros, PainelEspecies, PainelEmpresa, PainelAparencia, PainelSobre };
+            var abas = new RadioButton[] { AbaParametros, AbaEspecies, AbaEmpresaBotao, AbaAparencia, AbaWhatsapp, AbaSobre };
+            var paineis = new FrameworkElement[] { PainelParametros, PainelEspecies, PainelEmpresa, PainelAparencia, PainelWhatsapp, PainelSobre };
             for (int i = 0; i < abas.Length; i++)
             {
                 abas[i].IsChecked = i == aba;
@@ -50,11 +63,20 @@ namespace EspacoFestas.Views
             {
                 CarregarEspecies();
             }
+
+            if (aba == AbaWhatsappIndice)
+            {
+                CarregarWhatsapp();
+            }
+            else
+            {
+                _consultaWhatsapp.Stop();
+            }
         }
 
         private void Aba_Click(object sender, RoutedEventArgs e)
         {
-            var abas = new object[] { AbaParametros, AbaEspecies, AbaEmpresaBotao, AbaAparencia, AbaSobre };
+            var abas = new object[] { AbaParametros, AbaEspecies, AbaEmpresaBotao, AbaAparencia, AbaWhatsapp, AbaSobre };
             MostrarAba(Array.IndexOf(abas, sender));
         }
 
@@ -306,6 +328,167 @@ namespace EspacoFestas.Views
             var tema = sender == OpcaoClaro ? Tema.Claro : sender == OpcaoSistema ? Tema.SeguirWindows : Tema.Escuro;
             TemaService.Aplicar(tema);
             Salvar(c => c.Tema = tema);
+        }
+
+        // ------------------------------------------------------------------
+        // WhatsApp (RF26; mensagens padrão e envios em popups)
+        // ------------------------------------------------------------------
+
+        /// <summary>QR de enfeite (borrado) quando não há QR de verdade para ler: desligado, desconectado ou já conectado.</summary>
+        private static readonly Lazy<BitmapImage> QrEnfeite = new(() => GerarQr("Fest Agenda · WhatsApp"));
+
+        private void CarregarWhatsapp()
+        {
+            ChkWhatsappAtivo.IsChecked = App.Sistema.WhatsappAtivo;
+            TxtLimiteDiario.Text = App.Sistema.WhatsappLimiteDiario.ToString();
+            AtualizarResumoEnvios();
+            _ = AtualizarEstadoWhatsappAsync();
+            _consultaWhatsapp.Start();
+        }
+
+        private void AtualizarResumoEnvios()
+        {
+            using var contexto = App.CriarContexto();
+            TxtResumoEnvios.Text = $"Hoje: {WhatsappMensagens.EnviadasHoje(contexto)} de {App.Sistema.WhatsappLimiteDiario}";
+        }
+
+        private async Task AtualizarEstadoWhatsappAsync()
+        {
+            WhatsappStatus status = App.Sistema.WhatsappAtivo
+                ? await WhatsappServidor.Atual.ObterStatusAsync()
+                : WhatsappStatus.ServidorParado("WhatsApp desligado");
+
+            bool conectado = status.EstaConectado;
+            bool aguardandoQr = status.Estado == WhatsappStatus.AguardandoQr && status.Qr is not null;
+
+            TxtEstadoWhatsapp.Text = conectado && status.Numero is { } numero
+                ? $"{status.Descricao} · {Documentos.FormatarTelefone(numero.StartsWith("55") ? numero[2..] : numero)}"
+                : status.Descricao;
+            var (selo, ponto) = conectado ? ("SeloSucesso", "CorSucesso")
+                : status.Estado == WhatsappStatus.ComErro ? ("SeloErro", "CorErro")
+                : aguardandoQr || status.Estado == WhatsappStatus.Conectando ? ("SeloDestaque", "CorDestaque")
+                : ("Selo", "CorTextoSecundario");
+            SeloEstadoWhatsapp.SetResourceReference(StyleProperty, selo);
+            PontoEstado.SetResourceReference(Shape.FillProperty, ponto);
+
+            // QR: nítido só enquanto espera a leitura; nos demais estados, o de enfeite borrado (com check se conectado)
+            if (aguardandoQr)
+            {
+                if (status.Qr != _qrMostrado)
+                {
+                    ImgQr.Source = GerarQr(status.Qr!);
+                    _qrMostrado = status.Qr;
+                }
+            }
+            else
+            {
+                ImgQr.Source = QrEnfeite.Value;
+                _qrMostrado = null;
+            }
+
+            BorraoQr.Radius = aguardandoQr ? 0 : 14;
+            ImgQr.Opacity = aguardandoQr ? 1 : conectado ? 0.35 : 0.55;
+            SeloConectadoQr.Visibility = conectado ? Visibility.Visible : Visibility.Collapsed;
+            TxtInstrucaoQr.Visibility = aguardandoQr ? Visibility.Visible : Visibility.Collapsed;
+            TxtLegendaQr.Text = conectado ? "Conectado"
+                : aguardandoQr ? "Aponte a câmera do celular"
+                : App.Sistema.WhatsappAtivo ? "Clique em Conectar para gerar o QR code"
+                : "Ative o WhatsApp para conectar";
+
+            bool servidorNoAr = status.Estado != WhatsappStatus.Parado;
+            BtnConectar.Visibility = servidorNoAr && status.Estado is WhatsappStatus.Desconectado or WhatsappStatus.ComErro
+                ? Visibility.Visible : Visibility.Collapsed;
+            BtnDesconectar.Visibility = servidorNoAr && status.Estado is not (WhatsappStatus.Desconectado or WhatsappStatus.ComErro)
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        /// <summary>QR code em PNG (preto no branco), do texto que o WhatsApp mandou.</summary>
+        private static BitmapImage GerarQr(string texto)
+        {
+            using var gerador = new QRCodeGenerator();
+            using var dados = gerador.CreateQrCode(texto, QRCodeGenerator.ECCLevel.M);
+            var png = new PngByteQRCode(dados).GetGraphic(8);
+            var imagem = new BitmapImage();
+            imagem.BeginInit();
+            imagem.CacheOption = BitmapCacheOption.OnLoad;
+            imagem.StreamSource = new MemoryStream(png);
+            imagem.EndInit();
+            imagem.Freeze();
+            return imagem;
+        }
+
+        private async void ChkWhatsappAtivo_Click(object sender, RoutedEventArgs e)
+        {
+            bool ativo = ChkWhatsappAtivo.IsChecked == true;
+            Salvar(c => c.WhatsappAtivo = ativo);
+            if (ativo)
+            {
+                MostrarMensagem(TxtMensagemWhatsapp, "Iniciando o serviço do WhatsApp...", erro: false);
+                await WhatsappServidor.Atual.IniciarAsync();
+                TxtMensagemWhatsapp.Text = string.Empty;
+            }
+            else
+            {
+                WhatsappServidor.Atual.Parar();
+                MostrarMensagem(TxtMensagemWhatsapp, "WhatsApp desligado. A sessão fica salva para quando ligar de novo.", erro: false);
+            }
+
+            await AtualizarEstadoWhatsappAsync();
+        }
+
+        private async void BtnSalvarLimite_Click(object sender, RoutedEventArgs e)
+        {
+            if (!short.TryParse(TxtLimiteDiario.Text.Trim(), out var limite) || limite is < 1 or > 200)
+            {
+                Controls.Estilo.SetErro(TxtLimiteDiario, true);
+                MostrarMensagem(TxtMensagemWhatsapp, "Informe um limite entre 1 e 200 mensagens por dia.", erro: true);
+                return;
+            }
+
+            Controls.Estilo.SetErro(TxtLimiteDiario, false);
+            Salvar(c => c.WhatsappLimiteDiario = limite);
+            if (App.Sistema.WhatsappAtivo)
+            {
+                // O servidor recebe o limite ao iniciar
+                await WhatsappServidor.Atual.IniciarAsync();
+            }
+
+            AtualizarResumoEnvios();
+            MostrarMensagem(TxtMensagemWhatsapp, "Limite salvo.", erro: false);
+        }
+
+        private async void BtnConectar_Click(object sender, RoutedEventArgs e)
+        {
+            BtnConectar.IsEnabled = false;
+            try
+            {
+                await WhatsappServidor.Atual.ConectarAsync();
+                await AtualizarEstadoWhatsappAsync();
+            }
+            finally
+            {
+                BtnConectar.IsEnabled = true;
+            }
+        }
+
+        private async void BtnDesconectar_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Dialogo.Confirmar("Desconectar o WhatsApp",
+                    "O sistema sai do WhatsApp deste número. Para enviar de novo, será preciso ler o QR code.", "Desconectar", perigo: true))
+            {
+                return;
+            }
+
+            await WhatsappServidor.Atual.DesconectarAsync();
+            await AtualizarEstadoWhatsappAsync();
+        }
+
+        private void BtnMensagens_Click(object sender, RoutedEventArgs e) => MainWindow.Atual.MostrarModal(new ModelosMensagemWindow());
+
+        private void BtnEnvios_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow.Atual.MostrarModal(new EnviosWhatsappWindow());
+            AtualizarResumoEnvios();
         }
 
         private static void MostrarMensagem(TextBlock texto, string mensagem, bool erro)

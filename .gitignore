@@ -26,6 +26,19 @@ TestResults/
 # Configuração real (tem caminhos/senha de cada máquina) — versionar só config.exemplo.ini
 config.ini
 
+# Instaladores de ferramentas da máquina de desenvolvimento (SDK do .NET, Firebird, RDBExpert): grandes demais e de terceiros.
+# Os .bat e o LEIAME.txt da mesma pasta continuam versionados (vão para o instalador).
+Installer/Utilitarios/*.exe
+Installer/Utilitarios/*.msi
+Installer/Utilitarios/*.zip
+Installer/Utilitarios/RDBExpert/
+
+# WhatsApp: dependências (npm ci recria pelo package-lock.json), Node portátil e a SESSÃO (login do número: nunca versionar)
+Whatsapp/server/node_modules/
+Whatsapp/node/
+Whatsapp/sessao/
+**/Whatsapp/sessao/
+
 # Logs (o sistema grava Log\RelatorioLog.log ao lado do executável)
 *.log
 Log/

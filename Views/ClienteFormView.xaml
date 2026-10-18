@@ -28,7 +28,9 @@
                         <TextBlock Text="Nome completo *" Style="{StaticResource TextoRotulo}"/>
                         <TextBox x:Name="TxtNome" Tag="Digite o nome" MaxLength="100" Margin="0,0,0,16"/>
                         <TextBlock Text="Telefone *" Style="{StaticResource TextoRotulo}"/>
-                        <TextBox x:Name="TxtTelefone" Tag="(49) 99999-9999" ctl:Mascara.Tipo="Telefone" Margin="0,0,0,16"/>
+                        <TextBox x:Name="TxtTelefone" Tag="(49) 99999-9999" ctl:Mascara.Tipo="Telefone" Margin="0,0,0,8"/>
+                        <!-- Consentimento (LGPD): desmarcado, o sistema não envia nada pelo WhatsApp -->
+                        <CheckBox x:Name="ChkAceitaWhatsapp" Content="Aceita receber mensagens pelo WhatsApp" IsChecked="True" Margin="0,0,0,16"/>
                         <TextBlock Text="CPF ou CNPJ" Style="{StaticResource TextoRotulo}"/>
                         <TextBox x:Name="TxtCpfCnpj" Tag="000.000.000-00 ou 00.000.000/0000-00" ctl:Mascara.Tipo="CpfCnpj" Margin="0,0,0,16"
                                  LostFocus="TxtCpfCnpj_LostFocus"/>

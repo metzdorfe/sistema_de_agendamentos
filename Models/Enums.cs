@@ -21,6 +21,23 @@ public enum TipoLancamento
     Saida
 }
 
+public enum TipoMensagem
+{
+    Catalogo,
+    Orcamento,
+    LembreteEvento,
+    CobrancaParcela,
+    Avulsa
+}
+
+public enum StatusMensagem
+{
+    Pendente,
+    Enviada,
+    Falha,
+    Cancelada
+}
+
 public enum Tema
 {
     Escuro,

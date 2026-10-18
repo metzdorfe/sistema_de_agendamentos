@@ -34,6 +34,8 @@ namespace EspacoFestas.Views
 
         private List<ClienteOpcao> _clientes = [];
         private int? _clienteId;
+        /// <summary>Já pago pelo cliente (sinal e pagamentos), para limitar o novo sinal e o total.</summary>
+        private decimal _valorPago;
 
         private Dictionary<int, ServicoCadastro> _cadastroServicos = [];
         private Dictionary<int, AdicionalCadastro> _cadastroAdicionais = [];
@@ -209,7 +211,7 @@ namespace EspacoFestas.Views
                 _adicionaisGravados.Add(item.AdicionalId);
             }
 
-            decimal pago = AgendamentoService.ValorPago(contexto, agendamento.Id);
+            decimal pago = _valorPago = AgendamentoService.ValorPago(contexto, agendamento.Id);
             if (pago > 0)
             {
                 TxtSinalPago.Text = $"Já pago pelo cliente (sinal e pagamentos): {Formatos.Moeda(pago)}.";
@@ -259,7 +261,8 @@ namespace EspacoFestas.Views
                     AvisoSomenteLeitura.Visibility = Visibility.Visible;
                     if (_status == StatusAgendamento.Faturado)
                     {
-                        TxtSomenteLeitura.Text = "Agendamento faturado: itens, valores, desconto e formas de pagamento não podem mais ser alterados (RN17). A única ação possível é cancelar.";
+                        TxtSomenteLeitura.Text = "Agendamento faturado: itens, valores, desconto e formas de pagamento não podem mais ser alterados. A única ação possível é cancelar.";
+                        MostrarLucro();
                     }
 
                     BtnCancelar.Visibility = BtnSalvarOrcamento.Visibility = BtnAgendar.Visibility = BtnAgendarFaturar.Visibility = Visibility.Collapsed;
@@ -269,10 +272,37 @@ namespace EspacoFestas.Views
 
             if (_status != StatusAgendamento.Cancelado)
             {
+                BtnWhatsapp.Visibility = Visibility.Visible;
                 BtnCancelarAgendamento.Visibility = Visibility.Visible;
                 var avaliacao = AgendamentoService.AvaliarCancelamento(_id!.Value);
                 BtnCancelarAgendamento.IsEnabled = avaliacao.Permitido;
                 BtnCancelarAgendamento.ToolTip = avaliacao.Impedimento;
+            }
+        }
+
+        /// <summary>RF16: receita − custo dos adicionais − despesas do evento, com a lista das despesas.</summary>
+        private void MostrarLucro()
+        {
+            using var contexto = App.CriarContexto();
+            var lucro = AgendamentoService.CalcularLucro(contexto, _id!.Value);
+            var dataEvento = contexto.Agendamentos.Where(a => a.Id == _id).Select(a => a.DataEvento).Single();
+
+            PainelLucro.Visibility = Visibility.Visible;
+            TxtLucroAviso.Text = dataEvento >= DateTime.Today
+                ? "O evento ainda não aconteceu: o lucro muda conforme as despesas forem lançadas (Financeiro → Caixa → Novo lançamento, escolhendo este evento)."
+                : "Despesas do evento são lançadas em Financeiro → Caixa → Novo lançamento, escolhendo este evento.";
+            TxtLucroReceita.Text = Formatos.Moeda(lucro.Receita);
+            TxtLucroCusto.Text = "− " + Formatos.Moeda(lucro.CustoAdicionais);
+            TxtLucroDespesas.Text = "− " + Formatos.Moeda(lucro.TotalDespesas);
+            TxtLucro.Text = Formatos.Moeda(lucro.Lucro);
+            TxtLucro.SetResourceReference(TextBlock.ForegroundProperty, lucro.Lucro >= 0 ? "CorSucesso" : "CorErro");
+
+            ListaDespesas.Items.Clear();
+            foreach (var (data, descricao, valor) in lucro.Despesas)
+            {
+                var linha = new TextBlock { Text = $"{Formatos.Data(data)} · {descricao}: {Formatos.Moeda(valor)}", TextTrimming = TextTrimming.CharacterEllipsis };
+                linha.SetResourceReference(StyleProperty, "TextoAuxiliar");
+                ListaDespesas.Items.Add(linha);
             }
         }
 
@@ -563,9 +593,9 @@ namespace EspacoFestas.Views
             {
                 if (_ocupados.Contains(linha.ServicoId))
                 {
-                    linha.Erro = $"{linha.Nome} já está reservado em {Formatos.Data(data)} (RN10).";
+                    linha.Erro = $"{linha.Nome} já está reservado em {Formatos.Data(data)}.";
                 }
-                else if (linha.Erro?.Contains("RN10") == true)
+                else if (linha.Erro?.Contains("já está reservado") == true)
                 {
                     linha.Erro = null;
                 }
@@ -875,7 +905,7 @@ namespace EspacoFestas.Views
             {
                 if (_ocupados.Contains(linha.ServicoId))
                 {
-                    linha.Erro = $"{linha.Nome} já está reservado nesta data (RN10).";
+                    linha.Erro = $"{linha.Nome} já está reservado nesta data.";
                 }
                 else if (linha.FaixaSelecionada is null)
                 {
@@ -912,6 +942,7 @@ namespace EspacoFestas.Views
                 Erro(ErroRodape, TxtDesconto, "O desconto é maior que o valor dos serviços e adicionais.");
             }
 
+            decimal total = AgendamentoService.CalcularTotal(SubtotalServicos, SubtotalAdicionais, Math.Max(0, desconto));
             decimal sinal = 0;
             var especie = CmbEspecie.SelectedItem as EspecieOpcao;
             if (TxtSinal.Text.Trim().Length > 0 && (!Formatos.TentarLerDecimal(TxtSinal.Text, out sinal) || sinal < 0))
@@ -921,6 +952,14 @@ namespace EspacoFestas.Views
             else if (sinal > 0 && especie is null)
             {
                 Erro(ErroRodape, CmbEspecie, "Escolha a espécie do sinal.");
+            }
+            else if (_valorPago > total && !Estilo.GetErro(TxtDesconto))
+            {
+                Erro(ErroRodape, null, $"O total não pode ficar menor que o já pago pelo cliente ({Formatos.Moeda(_valorPago)}).");
+            }
+            else if (sinal > total - _valorPago && !Estilo.GetErro(TxtDesconto))
+            {
+                Erro(ErroRodape, TxtSinal, $"O sinal passa do valor que falta pagar ({Formatos.Moeda(Math.Max(total - _valorPago, 0))}).");
             }
 
             if (erros.Count > 0)
@@ -977,6 +1016,11 @@ namespace EspacoFestas.Views
                     MostrarErro(ErroServicos, null, ex.Message);
                     ErroServicos.BringIntoView();
                 }
+                else if (ex.Campo == "Sinal")
+                {
+                    MostrarErro(ErroRodape, TxtSinal, ex.Message);
+                    TxtSinal.BringIntoView();
+                }
                 else
                 {
                     MostrarErro(TxtErroGeral, null, ex.Message);
@@ -992,6 +1036,13 @@ namespace EspacoFestas.Views
 
             Gravou = true;
             _alterado = false;
+
+            // RF30: orçamento salvo, oferece mandar para o cliente (falha no envio não desfaz nada)
+            if (status == StatusAgendamento.Orcamento && App.Sistema.WhatsappAtivo
+                && Dialogo.Confirmar("Orçamento salvo", "Deseja enviar o orçamento para o cliente pelo WhatsApp?", "Enviar"))
+            {
+                EnviarWhatsapp();
+            }
 
             if (faturar)
             {
@@ -1051,6 +1102,29 @@ namespace EspacoFestas.Views
             Gravou = true;
             _alterado = false;
             Fechar(true);
+        }
+
+        private void BtnWhatsapp_Click(object sender, RoutedEventArgs e)
+        {
+            if (_alterado && !_somenteLeitura)
+            {
+                MostrarErro(TxtErroGeral, null, "Salve as alterações antes de enviar pelo WhatsApp.");
+                Rolagem.ScrollToTop();
+                return;
+            }
+
+            EnviarWhatsapp();
+        }
+
+        /// <summary>RF29: prévia e envio do resumo do orçamento/agendamento.</summary>
+        private void EnviarWhatsapp()
+        {
+            var janela = EnvioWhatsappWindow.Orcamento(_id!.Value);
+            Modal.Mostrar(janela, this, Overlay);
+            if (janela.Enviou)
+            {
+                Dialogo.Avisar("Mensagem enviada", "O resumo foi enviado para o cliente pelo WhatsApp.");
+            }
         }
 
         private void BtnCancelar_Click(object sender, RoutedEventArgs e) => TentarFechar();

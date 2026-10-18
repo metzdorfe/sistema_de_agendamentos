@@ -15,9 +15,9 @@
 | Acesso ao banco | **Entity Framework Core 10** | Provider oficial do Firebird para EF Core 10. |
 | PDF | **QuestPDF** | Catálogo e relatórios. Conferir as condições da licença Community antes da entrega. |
 | Excel | **ClosedXML** (MIT) | Relatórios em XLSX (RNF18). |
-| WhatsApp | **WA-AKG** (pendente) | Previsto nos ajustes v2, mas exige Node 20+, Next.js e um servidor **MySQL/PostgreSQL** (sessão do WhatsApp guardada no banco dele). Aguarda decisão do grupo. |
+| WhatsApp | **Baileys** `@whiskeysockets/baileys` 7.0.0-rc14 (não oficial) em servidor **Node.js** local | Decidido em 18/10/2026 no lugar do WA-AKG (que exigia Next.js e MySQL/PostgreSQL). Node 24 LTS portátil em `Whatsapp\node`, código em `Whatsapp\server` (versões travadas no `package-lock.json`), sessão em `Whatsapp\sessao`. O app fala com ele por HTTP em 127.0.0.1 com token (`Services/Whatsapp/IWhatsappService`), o que permite trocar pela API oficial no futuro. Risco: biblioteca não oficial, o número pode ser bloqueado. |
 | Configuração técnica | **config.ini** | Só a conexão do banco. Lido pelo `Microsoft.Extensions.Configuration.Ini`. |
-| Fonte | **Inter** + **Pacifico** | Embutidas no projeto (SIL OFL 1.1). Pacifico só no nome "Fest Agenda" (`FonteMarca`). |
+| Fonte | **Inter** + **Pacifico** | Embutidas no projeto (SIL OFL 1.1). Pacifico só no nome "Fest Agenda" (`FonteMarca`). Em XAML, referenciar pelo caminho relativo ao dicionário (`../Assets/Fonts/#Inter`): a forma `pack://application:,,,/...` não carregava as fontes embutidas. |
 | Versionamento | **Git** | |
 | IDE | **Visual Studio** | |
 | Instalador | **Inno Setup 6** | `Installer/FestAgenda.iss`, gerado pelo `build-instalador.ps1`. |
@@ -31,6 +31,8 @@
 | `Microsoft.Extensions.Configuration.Ini` | Leitura do `config.ini`. |
 | `QuestPDF` | Geração do catálogo e dos relatórios em PDF. |
 | `ClosedXML` | Relatórios em XLSX (cabeçalho, primeira linha congelada, R$ como número, datas como data). |
+| `QRCoder` (MIT) | QR code da conexão do WhatsApp em Configurações. |
+| `xunit.v3` (só no `FestAgenda.Tests`) | Testes das regras de negócio, com banco Firebird criado do zero a cada execução. |
 | Biblioteca de controles (a definir) | Estilo dos controles nos dois temas. Candidatas: WPF-UI, MaterialDesignInXamlToolkit ou o tema Fluent nativo do WPF. Requisito: **trocar de tema em tempo de execução**. |
 
 Instalar sempre a versão estável mais recente compatível com .NET 10.

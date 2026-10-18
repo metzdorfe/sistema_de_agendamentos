@@ -84,7 +84,7 @@
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Espécie usada *" Style="{StaticResource TextoRotulo}"/>
-                            <ComboBox x:Name="CmbEspecie" ToolTip="Pode ser diferente da combinada (RN20)"/>
+                            <ComboBox x:Name="CmbEspecie" ToolTip="Pode ser diferente da combinada"/>
                         </StackPanel>
                     </Grid>
 

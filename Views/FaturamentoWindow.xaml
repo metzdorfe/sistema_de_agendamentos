@@ -79,7 +79,7 @@
                             </StackPanel>
                         </Grid>
                         <TextBlock x:Name="TxtAvisoEspecie" Style="{StaticResource TextoAuxiliar}" Margin="0,6,0,0" Visibility="Collapsed"
-                                   Text="Esta espécie não permite parcelamento: só 1 vez (RN15)."/>
+                                   Text="Esta espécie não permite parcelamento: só 1 vez."/>
 
                         <TextBlock Text="Vencimento das parcelas *" Style="{StaticResource TextoRotulo}" Margin="0,16,0,8"/>
                         <WrapPanel>
@@ -155,7 +155,7 @@
             <Border Grid.Row="2" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,1,0,0" Padding="24,16">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Left" Style="{StaticResource TextoAuxiliar}" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300"
-                               Text="Depois de faturado, itens e valores não mudam mais (RN17)."/>
+                               Text="Depois de faturado, itens e valores não mudam mais."/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancelar" Style="{StaticResource BotaoFantasma}" Margin="0,0,8,0" Click="BtnCancelar_Click"/>
                         <Button x:Name="BtnConfirmar" Content="Confirmar faturamento" Style="{StaticResource BotaoPrincipal}" IsEnabled="False"

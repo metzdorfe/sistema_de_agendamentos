@@ -14,4 +14,19 @@ INSERT INTO ESPECIE (DESCRICAO, PERMITE_PARCELAMENTO, ATIVO) VALUES ('Cartão de
 INSERT INTO ESPECIE (DESCRICAO, PERMITE_PARCELAMENTO, ATIVO) VALUES ('Transferência bancária', FALSE, TRUE);
 INSERT INTO ESPECIE (DESCRICAO, PERMITE_PARCELAMENTO, ATIVO) VALUES ('Boleto', TRUE, TRUE);
 
+-- Textos padrão do WhatsApp (editáveis em Configurações → WhatsApp)
+INSERT INTO MODELO_MENSAGEM (TIPO, TITULO, TEXTO, ATIVO) VALUES ('C', 'Catálogo',
+'Olá, {cliente}! Segue o catálogo de serviços da {empresa}. Qualquer dúvida, é só chamar.', TRUE);
+INSERT INTO MODELO_MENSAGEM (TIPO, TITULO, TEXTO, ATIVO) VALUES ('O', 'Orçamento / agendamento',
+'Olá, {cliente}! Segue o resumo do seu {status}:
+
+*{titulo}*
+Data: {data}, das {hora}
+Serviços: {servicos}
+Total: {valor}
+Já pago: {pago}
+Saldo: {saldo}
+
+{empresa} - {telefone_empresa}', TRUE);
+
 COMMIT;

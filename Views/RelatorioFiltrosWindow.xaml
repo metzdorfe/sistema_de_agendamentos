@@ -79,6 +79,8 @@
             <Border Grid.Row="2" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,1,0,0" Padding="24,16">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancelar" Style="{StaticResource BotaoFantasma}" Margin="0,0,8,0" Click="BtnFechar_Click"/>
+                    <!-- RF28: só no catálogo -->
+                    <Button x:Name="BtnWhatsapp" Content="Enviar por WhatsApp" Margin="0,0,8,0" Visibility="Collapsed" Click="BtnWhatsapp_Click"/>
                     <Button x:Name="BtnXlsx" Content="Gerar Excel (XLSX)" Margin="0,0,8,0" Click="BtnXlsx_Click"/>
                     <Button x:Name="BtnPdf" Content="Gerar PDF" Style="{StaticResource BotaoPrincipal}" Click="BtnPdf_Click"/>
                 </StackPanel>

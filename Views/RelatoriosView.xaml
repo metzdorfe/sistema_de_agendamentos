@@ -9,7 +9,6 @@
             <!-- Cartões montados no code-behind, um por IRelatorio -->
             <UniformGrid x:Name="GradeRelatorios" Columns="2" Margin="-8,24,-8,0"/>
 
-            <TextBlock x:Name="TxtLog" Style="{StaticResource TextoAuxiliar}" Margin="0,16,0,0" TextWrapping="Wrap"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

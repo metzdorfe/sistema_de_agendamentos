@@ -8,7 +8,7 @@
 
 ## Visão geral
 
-São **12 tabelas**, divididas em quatro grupos:
+São **14 tabelas**, divididas em cinco grupos:
 
 | Grupo | Tabelas |
 |---|---|
@@ -16,6 +16,7 @@ São **12 tabelas**, divididas em quatro grupos:
 | Agendamento | AGENDAMENTO, SERVICO_AGENDAMENTO, ADICIONAL_AGENDAMENTO |
 | Financeiro | RECEBER, FINANCEIRO |
 | Configuração | CONFIGURACAO |
+| Comunicação (18/10/2026) | WHATSAPP_MENSAGEM, MODELO_MENSAGEM |
 
 ## Convenção de nomes
 
@@ -153,6 +154,30 @@ erDiagram
         int RECEBER_ID FK "opcional"
         int AGENDAMENTO_ID FK "opcional"
         varchar DESCRICAO
+        bigint LANCAMENTO_ESTORNADO_ID FK "opcional, só em estorno ou devolução"
+        boolean MOVIMENTACAO_CAIXA "suprimento ou sangria"
+    }
+    WHATSAPP_MENSAGEM {
+        int ID PK
+        int CLIENTE_ID FK "opcional"
+        int AGENDAMENTO_ID FK "opcional"
+        int RECEBER_ID FK "opcional"
+        varchar TELEFONE "55 + DDD + número"
+        char TIPO "C O L P A"
+        varchar TEXTO
+        varchar CAMINHO_ANEXO "relativo a Arquivos"
+        char STATUS "P E F C"
+        timestamp DATA_CRIACAO
+        timestamp DATA_ENVIO
+        smallint TENTATIVAS
+        varchar MENSAGEM_ERRO
+    }
+    MODELO_MENSAGEM {
+        int ID PK
+        char TIPO "um por tipo"
+        varchar TITULO
+        varchar TEXTO "com variáveis"
+        boolean ATIVO
     }
     CONFIGURACAO {
         int ID PK "sempre 1"
@@ -167,8 +192,14 @@ erDiagram
         varchar EMAIL_EMPRESA
         varchar ENDERECO_EMPRESA
         varchar CAMINHO_LOGO_EMPRESA "relativo a Arquivos"
+        boolean WHATSAPP_ATIVO
+        smallint WHATSAPP_LIMITE_DIARIO
     }
+    CLIENTE ||--o{ WHATSAPP_MENSAGEM : "recebe"
+    AGENDAMENTO |o--o{ WHATSAPP_MENSAGEM : "resumo enviado"
 ```
+
+> CLIENTE ganhou `ACEITA_WHATSAPP` (boolean, padrão verdadeiro) em 18/10/2026; o diagrama acima mostra só os campos novos das tabelas de comunicação.
 
 > **FINANCEIRO** é o "caixa": o que entrou ou saiu de fato. Nas telas do sistema pode continuar aparecendo como "Caixa" — é a mesma tabela.
 
@@ -252,6 +283,7 @@ Exemplo: parcela R$ 1.000,00, juros 2% a.m., multa 2%, 15 dias de atraso → jur
 | Lançamento avulso (compra de material) | vazio | vazio |
 
 - `ESPECIE_ID` é sempre preenchido (a espécie **real**, o que aconteceu de fato — pode ser diferente da combinada em RECEBER).
+- `LANCAMENTO_ESTORNADO_ID` (desde 18/10/2026, `alteracoes-2026-10-18.sql`): só na saída de estorno ou de devolução por cancelamento, aponta para a entrada desfeita (baixa de parcela, sinal ou entrada avulsa), com a mesma origem dela. Separa estorno e devolução de despesa do evento (todas são saídas ligadas ao agendamento), faz o sinal estornado deixar de bloquear a data e, com índice único, impede desfazer a mesma entrada duas vezes. CHECK: só em saída. Devoluções anteriores a essa data não apontam para a entrada; o sistema as reconhece pela descrição "Devolução por cancelamento – …" no agendamento cancelado.
 
 ### Configuração
 
@@ -270,6 +302,20 @@ Exemplo: parcela R$ 1.000,00, juros 2% a.m., multa 2%, 15 dias de atraso → jur
 - `NOME_EMPRESA`, `CNPJ_EMPRESA` (só dígitos), `TELEFONE_EMPRESA`, `EMAIL_EMPRESA`, `ENDERECO_EMPRESA` (texto livre, uma linha — só é exibido, não é filtrado).
 - `CAMINHO_LOGO_EMPRESA`: caminho da logo **relativo à pasta `Arquivos\`** do sistema (ex.: `Empresa\logo_20260930142501123.png`). Ao escolher a imagem, o sistema copia para `Arquivos\Empresa`, com nome único, reduzida para no máximo 512 px, em PNG. Opcional; sem logo (ou se o arquivo sumir), a interface mostra o nome/iniciais.
 
+*WhatsApp (aba WhatsApp, 18/10/2026):*
+- `WHATSAPP_ATIVO`: liga o servidor local do WhatsApp (padrão desligado; desligado, o sistema funciona igual).
+- `WHATSAPP_LIMITE_DIARIO`: máximo de mensagens enviadas por dia (padrão 10, CHECK > 0; a tela aceita de 1 a 200).
+
+### Comunicação (18/10/2026)
+
+**WHATSAPP_MENSAGEM**: fila e histórico do WhatsApp; nada é apagado. Cada envio grava uma linha **P** (pendente) e passa a **E** (enviada, com `DATA_ENVIO`) ou **F** (falha, com `MENSAGEM_ERRO`); a falha pode ser reenviada (soma `TENTATIVAS`). O limite diário conta as **E** com `DATA_ENVIO` de hoje. `TELEFONE` guarda o número como foi enviado (só dígitos, com 55). `CAMINHO_ANEXO` é o PDF do catálogo, relativo a `Arquivos\` (`WhatsApp\catalogo_<data>.pdf`). `RECEBER_ID` e os tipos **L** (lembrete) e **P** (cobrança) ficam prontos para quando essas funções entrarem.
+
+**MODELO_MENSAGEM**: textos padrão editáveis por ela, **um por tipo** (índice único em `TIPO`), com variáveis entre chaves (`{cliente}`, `{titulo}`, `{status}`, `{data}`, `{hora}`, `{servicos}`, `{valor}`, `{pago}`, `{saldo}`, `{empresa}`, `{telefone_empresa}`). Vem com os modelos de catálogo (**C**) e orçamento (**O**).
+
+**CLIENTE.ACEITA_WHATSAPP**: consentimento (LGPD), marcado por padrão e desmarcável no cadastro; desmarcado, o sistema não envia.
+
+**FINANCEIRO.MOVIMENTACAO_CAIXA**: suprimento (entrada) ou sangria (saída), que só movimentam o dinheiro do caixa; sempre avulso (CHECK: sem `RECEBER_ID`, `AGENDAMENTO_ID` nem `LANCAMENTO_ESTORNADO_ID`).
+
 ## Restrições (CHECK)
 
 O banco guarda só as restrições **estruturais e fixas**. Regras que dependem de configuração (disponibilidade, prazo de devolução), a imutabilidade do faturado e a validação de CPF/CNPJ são feitas na aplicação.
@@ -278,6 +324,10 @@ O banco guarda só as restrições **estruturais e fixas**. Regras que dependem 
 -- FINANCEIRO: no máximo uma origem
 ALTER TABLE FINANCEIRO ADD CONSTRAINT CK_FINANCEIRO_ORIGEM
   CHECK (RECEBER_ID IS NULL OR AGENDAMENTO_ID IS NULL);
+
+-- FINANCEIRO: estorno é sempre saída
+ALTER TABLE FINANCEIRO ADD CONSTRAINT CK_FINANCEIRO_ESTORNO
+  CHECK (LANCAMENTO_ESTORNADO_ID IS NULL OR TIPO = 'S');
 
 -- AGENDAMENTO: data e motivo obrigatórios só no cancelamento
 ALTER TABLE AGENDAMENTO ADD CONSTRAINT CK_AGENDAMENTO_CANCELAMENTO
@@ -386,6 +436,7 @@ CREATE DOMAIN D_CAMINHO_ARQUIVO    AS VARCHAR(260);
 - AGENDAMENTO(DATA_EVENTO), para o calendário.
 - RECEBER(STATUS, DATA_VENCIMENTO), para o contas a receber.
 - FINANCEIRO(DATA_LANCAMENTO), para o relatório de caixa.
+- FINANCEIRO(LANCAMENTO_ESTORNADO_ID), único: uma entrada só pode ser estornada ou devolvida uma vez.
 - CLIENTE(NOME), para busca.
 - CLIENTE(CPF_CNPJ), único.
 
@@ -408,6 +459,6 @@ No .NET, o `.ini` é lido pelo pacote gratuito `Microsoft.Extensions.Configurati
 - [x] Flags como BOOLEAN nativo.
 - [x] Campos do protótipo aprovados (título e horário do evento, CPF/CNPJ, e-mail, endereço detalhado, dados da empresa, tema).
 - [x] Tamanhos exatos dos VARCHAR: fechados em 04/10/2026 (tabela em "Tipos e domínios").
-- [ ] Tabela `MENSAGEM_WHATSAPP` (13ª, grupo "Comunicação", domínios `D_TIPO_MENSAGEM` e `D_STATUS_MENSAGEM`): definida no `ajustes.md`, ainda não criada. Aguarda a decisão sobre o serviço de WhatsApp: o WA-AKG exige servidor MySQL/PostgreSQL e guarda a sessão no banco dele, o que não bate com o previsto.
+- [x] Tabelas de comunicação criadas em 18/10/2026 (`alteracoes-2026-10-18.sql`): `WHATSAPP_MENSAGEM` e `MODELO_MENSAGEM`, domínios `D_TIPO_MENSAGEM` e `D_STATUS_MENSAGEM`. O nome segue o `prompt-whatsapp-finalizacao.md` (`WHATSAPP_MENSAGEM`), não o `MENSAGEM_WHATSAPP` do `ajustes.md`. A sessão do WhatsApp fica em arquivo (`Whatsapp\sessao`), não no banco.
 - [x] Limite de tamanho da logo: reduzida para no máximo 512 px ao salvar (agora em arquivo, `CAMINHO_LOGO_EMPRESA`).
 - [ ] Taxa da maquininha e desconto automático por espécie ficaram fora da v1 (decisão consciente); hoje o desconto é sempre manual, no campo `VALOR_DESCONTO` do agendamento.

@@ -109,7 +109,7 @@ public static class FinanceiroService
         if (parcelas.Sum(p => p.Valor) != aFaturar)
         {
             throw new RegraNegocioException("Geral",
-                $"A soma das parcelas ({Formatos.Moeda(parcelas.Sum(p => p.Valor))}) precisa ser igual ao valor a faturar ({Formatos.Moeda(aFaturar)}) (RN14).");
+                $"A soma das parcelas ({Formatos.Moeda(parcelas.Sum(p => p.Valor))}) precisa ser igual ao valor a faturar ({Formatos.Moeda(aFaturar)}).");
         }
 
         if (parcelas.Count > 0)
@@ -117,7 +117,7 @@ public static class FinanceiroService
             var especie = contexto.Especies.AsNoTracking().Single(e => e.Id == especieId);
             if (parcelas.Count > 1 && !especie.PermiteParcelamento)
             {
-                throw new RegraNegocioException("Geral", $"{especie.Descricao} não permite parcelamento: só 1 parcela (RN15).");
+                throw new RegraNegocioException("Geral", $"{especie.Descricao} não permite parcelamento: só 1 parcela.");
             }
         }
 
@@ -185,8 +185,8 @@ public static class FinanceiroService
         decimal multa = 0, juros = 0;
         if (dias > 0)
         {
-            multa = Math.Round(r.ValorParcela * App.Sistema.PercentualMulta / 100, 2);
-            juros = Math.Round(r.ValorParcela * App.Sistema.PercentualJurosMes / 100 / 30 * dias, 2);
+            multa = Math.Round(r.ValorParcela * App.Sistema.PercentualMulta / 100, 2, MidpointRounding.AwayFromZero);
+            juros = Math.Round(r.ValorParcela * App.Sistema.PercentualJurosMes / 100 / 30 * dias, 2, MidpointRounding.AwayFromZero);
         }
 
         return new CalculoBaixa(r.Id, r.Cliente, r.Titulo, r.DataEvento, r.NumeroParcela, total, r.EspecieId, r.Especie,
@@ -251,6 +251,180 @@ public static class FinanceiroService
 
         contexto.SaveChanges();
         transacao.Commit();
+    }
+
+    /// <summary>
+    /// RN21: estorno de baixa feita por engano. A parcela volta a Aberta (sem juros, multa, valor e data do recebimento),
+    /// sai do caixa o que tinha entrado (na mesma espécie) e a parcela da diferença, se houver, é cancelada.
+    /// </summary>
+    public static void EstornarBaixa(int receberId)
+    {
+        using var contexto = App.CriarContexto();
+        using var transacao = contexto.Database.BeginTransaction();
+        var parcela = contexto.Recebers.Include(r => r.Agendamento).Single(r => r.Id == receberId);
+        if (parcela.Status != StatusReceber.Pago)
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar: a parcela não está paga.");
+        }
+
+        if (parcela.Agendamento!.Status == StatusAgendamento.Cancelado)
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar: o agendamento está cancelado.");
+        }
+
+        var entrada = contexto.Financeiros
+            .Where(f => f.ReceberId == receberId && f.Tipo == TipoLancamento.Entrada
+                && !contexto.Financeiros.Any(e => e.LancamentoEstornadoId == f.Id))
+            .OrderByDescending(f => f.Id)
+            .FirstOrDefault()
+            ?? throw new RegraNegocioException("Geral", "Não é possível estornar: o recebimento desta parcela não está no caixa.");
+
+        var diferencas = contexto.Recebers.Where(r => r.ParcelaOrigemId == receberId && r.Status != StatusReceber.Cancelado).ToList();
+        if (diferencas.Any(r => r.Status == StatusReceber.Pago))
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar: a parcela da diferença já foi paga. Estorne ela primeiro.");
+        }
+
+        foreach (var diferenca in diferencas)
+        {
+            diferenca.Status = StatusReceber.Cancelado;
+        }
+
+        contexto.Financeiros.Add(new Financeiro
+        {
+            DataLancamento = DateTime.Today,
+            Tipo = TipoLancamento.Saida,
+            Valor = entrada.Valor,
+            EspecieId = entrada.EspecieId,
+            ReceberId = parcela.Id,
+            LancamentoEstornadoId = entrada.Id,
+            Descricao = Limitar($"Estorno da parcela {parcela.NumeroParcela} – {parcela.Agendamento.Titulo}")
+        });
+
+        parcela.Status = StatusReceber.Aberto;
+        parcela.ValorJuros = 0;
+        parcela.ValorMulta = 0;
+        parcela.ValorRecebido = 0;
+        parcela.DataRecebimento = null;
+        contexto.SaveChanges();
+        transacao.Commit();
+    }
+
+    /// <summary>
+    /// Estorno pelo caixa: baixa de parcela (RN21), sinal (RN26) ou entrada avulsa. Sinal estornado vira saída ligada
+    /// ao agendamento; um orçamento sem outro sinal deixa de bloquear a data.
+    /// </summary>
+    public static void Estornar(long lancamentoId)
+    {
+        using var contexto = App.CriarContexto();
+        var entrada = contexto.Financeiros.Include(f => f.Agendamento).AsNoTracking().Single(f => f.Id == lancamentoId);
+        if (entrada.Tipo != TipoLancamento.Entrada)
+        {
+            throw new RegraNegocioException("Geral",
+                "Não é possível estornar uma saída. Para corrigir uma saída lançada por engano, lance uma entrada avulsa do mesmo valor.");
+        }
+
+        if (entrada.MovimentacaoCaixa)
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar suprimento. Para corrigir, faça uma sangria do mesmo valor.");
+        }
+
+        if (contexto.Financeiros.Any(f => f.LancamentoEstornadoId == lancamentoId))
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar: este lançamento já foi estornado.");
+        }
+
+        if (entrada.ReceberId is { } receberId)
+        {
+            EstornarBaixa(receberId);
+            return;
+        }
+
+        if (entrada.Agendamento?.Status == StatusAgendamento.Faturado)
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar o sinal de um agendamento faturado. Se for o caso, cancele o agendamento.");
+        }
+
+        if (entrada.Agendamento?.Status == StatusAgendamento.Cancelado)
+        {
+            throw new RegraNegocioException("Geral", "Não é possível estornar: o agendamento está cancelado.");
+        }
+
+        using var transacao = contexto.Database.BeginTransaction();
+        contexto.Financeiros.Add(new Financeiro
+        {
+            DataLancamento = DateTime.Today,
+            Tipo = TipoLancamento.Saida,
+            Valor = entrada.Valor,
+            EspecieId = entrada.EspecieId,
+            AgendamentoId = entrada.AgendamentoId,
+            LancamentoEstornadoId = entrada.Id,
+            Descricao = Limitar(entrada.Agendamento is { } agendamento
+                ? $"Estorno de sinal – {agendamento.Titulo}"
+                : $"Estorno – {entrada.Descricao}")
+        });
+        contexto.SaveChanges();
+        transacao.Commit();
+    }
+
+    /// <summary>
+    /// RF15/RF12: lançamento feito à mão no caixa. Sem agendamento é avulso (ex.: compra de material, entrada ou saída);
+    /// com agendamento é despesa do evento (ex.: garçom), sempre saída, e entra no lucro do evento (RF16).
+    /// <paramref name="movimentacaoCaixa"/>: suprimento (entrada) ou sangria (saída), sempre avulso, fora de receita e despesa (RN34).
+    /// Retorna o ID do lançamento.
+    /// </summary>
+    public static long Lancar(DateTime data, TipoLancamento tipo, decimal valor, int especieId, string descricao, int? agendamentoId,
+        bool movimentacaoCaixa = false)
+    {
+        if (movimentacaoCaixa && agendamentoId is not null)
+        {
+            throw new RegraNegocioException("Agendamento", "Suprimento e sangria não se ligam a evento.");
+        }
+
+        descricao = descricao.Trim();
+        if (descricao.Length == 0)
+        {
+            throw new RegraNegocioException("Descricao", "Informe a descrição.");
+        }
+
+        if (valor <= 0)
+        {
+            throw new RegraNegocioException("Valor", "Informe um valor maior que zero.");
+        }
+
+        if (data.Date > DateTime.Today)
+        {
+            throw new RegraNegocioException("Data", "A data não pode ser futura.");
+        }
+
+        using var contexto = App.CriarContexto();
+        if (agendamentoId is { } id)
+        {
+            if (tipo != TipoLancamento.Saida)
+            {
+                throw new RegraNegocioException("Agendamento",
+                    "Não é possível lançar entrada ligada a um agendamento: pagamento do cliente entra pelo sinal ou pelo faturamento.");
+            }
+
+            if (contexto.Agendamentos.Where(a => a.Id == id).Select(a => a.Status).Single() == StatusAgendamento.Cancelado)
+            {
+                throw new RegraNegocioException("Agendamento", "Não é possível lançar despesa em agendamento cancelado.");
+            }
+        }
+
+        var lancamento = new Financeiro
+        {
+            DataLancamento = data.Date,
+            Tipo = tipo,
+            Valor = valor,
+            EspecieId = especieId,
+            AgendamentoId = agendamentoId,
+            MovimentacaoCaixa = movimentacaoCaixa,
+            Descricao = Limitar(descricao)
+        };
+        contexto.Financeiros.Add(lancamento);
+        contexto.SaveChanges();
+        return lancamento.Id;
     }
 
     private static string Limitar(string texto) => texto.Length <= 200 ? texto : texto[..200];

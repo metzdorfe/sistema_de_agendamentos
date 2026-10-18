@@ -59,4 +59,42 @@ internal static class Conversoes
         "S" => Tema.SeguirWindows,
         _ => Tema.Claro
     };
+
+    public static string TipoMensagemParaChar(TipoMensagem tipo) => tipo switch
+    {
+        TipoMensagem.Catalogo => "C",
+        TipoMensagem.Orcamento => "O",
+        TipoMensagem.LembreteEvento => "L",
+        TipoMensagem.CobrancaParcela => "P",
+        TipoMensagem.Avulsa => "A",
+        _ => throw new ArgumentOutOfRangeException(nameof(tipo))
+    };
+
+    public static TipoMensagem CharParaTipoMensagem(string tipo) => tipo switch
+    {
+        "C" => TipoMensagem.Catalogo,
+        "O" => TipoMensagem.Orcamento,
+        "L" => TipoMensagem.LembreteEvento,
+        "P" => TipoMensagem.CobrancaParcela,
+        "A" => TipoMensagem.Avulsa,
+        _ => throw new ArgumentOutOfRangeException(nameof(tipo))
+    };
+
+    public static string StatusMensagemParaChar(StatusMensagem status) => status switch
+    {
+        StatusMensagem.Pendente => "P",
+        StatusMensagem.Enviada => "E",
+        StatusMensagem.Falha => "F",
+        StatusMensagem.Cancelada => "C",
+        _ => throw new ArgumentOutOfRangeException(nameof(status))
+    };
+
+    public static StatusMensagem CharParaStatusMensagem(string status) => status switch
+    {
+        "P" => StatusMensagem.Pendente,
+        "E" => StatusMensagem.Enviada,
+        "F" => StatusMensagem.Falha,
+        "C" => StatusMensagem.Cancelada,
+        _ => throw new ArgumentOutOfRangeException(nameof(status))
+    };
 }

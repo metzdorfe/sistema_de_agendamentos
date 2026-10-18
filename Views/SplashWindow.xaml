@@ -5,7 +5,7 @@
         Title="Fest Agenda" Width="560" Height="340"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen" ShowInTaskbar="True"
-        FontFamily="{StaticResource FonteInter}" FontSize="14" Foreground="#F2EEF7"
+        FontFamily="{StaticResource FonteInter}" FontSize="14" Foreground="#ECECEF"
         Loaded="Window_Loaded" MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <!-- A splash é sempre escura, nos dois temas, e é igual à imagem estática (Assets/Splash/splash.png,
          gerada por Tools/gerar-marca.ps1 com o MESMO layout: ao mudar aqui, mudar lá), para não "piscar" na troca.
@@ -22,8 +22,8 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="ProgressBar">
                             <Grid>
-                                <Border x:Name="PART_Track" CornerRadius="2" Background="#2A0A4F"/>
-                                <Border x:Name="PART_Indicator" CornerRadius="2" HorizontalAlignment="Left" Background="#C77DFF"/>
+                                <Border x:Name="PART_Track" CornerRadius="2" Background="#2E2E35"/>
+                                <Border x:Name="PART_Indicator" CornerRadius="2" HorizontalAlignment="Left" Background="#B5A0F0"/>
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>
@@ -32,52 +32,52 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border CornerRadius="16" Background="#10002B" BorderBrush="#3C096C" BorderThickness="1" ClipToBounds="True">
+    <Border CornerRadius="16" Background="#1B1B1F" BorderBrush="#2E2E35" BorderThickness="1" ClipToBounds="True">
         <Grid>
             <!-- Confete: canto superior direito e inferior esquerdo -->
             <Canvas IsHitTestVisible="False">
-                <Ellipse Canvas.Left="474" Canvas.Top="30" Width="14" Height="14" Fill="#7B2CBF"/>
-                <Ellipse Canvas.Left="508" Canvas.Top="68" Width="8" Height="8" Fill="#D6A24A"/>
-                <Ellipse Canvas.Left="440" Canvas.Top="70" Width="6" Height="6" Fill="#C77DFF"/>
-                <Rectangle Canvas.Left="500" Canvas.Top="22" Width="18" Height="6" RadiusX="3" RadiusY="3" Fill="#C77DFF">
+                <Ellipse Canvas.Left="474" Canvas.Top="30" Width="14" Height="14" Fill="#7C5AD9"/>
+                <Ellipse Canvas.Left="508" Canvas.Top="68" Width="8" Height="8" Fill="#E0A94F"/>
+                <Ellipse Canvas.Left="440" Canvas.Top="70" Width="6" Height="6" Fill="#B5A0F0"/>
+                <Rectangle Canvas.Left="500" Canvas.Top="22" Width="18" Height="6" RadiusX="3" RadiusY="3" Fill="#B5A0F0">
                     <Rectangle.RenderTransform><RotateTransform Angle="35"/></Rectangle.RenderTransform>
                 </Rectangle>
-                <Rectangle Canvas.Left="452" Canvas.Top="104" Width="14" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#5FB98A">
+                <Rectangle Canvas.Left="452" Canvas.Top="104" Width="14" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#5CC98A">
                     <Rectangle.RenderTransform><RotateTransform Angle="-25"/></Rectangle.RenderTransform>
                 </Rectangle>
-                <Rectangle Canvas.Left="520" Canvas.Top="112" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7B2CBF">
+                <Rectangle Canvas.Left="520" Canvas.Top="112" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7C5AD9">
                     <Rectangle.RenderTransform><RotateTransform Angle="60"/></Rectangle.RenderTransform>
                 </Rectangle>
 
-                <Ellipse Canvas.Left="40" Canvas.Top="232" Width="12" Height="12" Fill="#D6A24A"/>
-                <Ellipse Canvas.Left="78" Canvas.Top="268" Width="7" Height="7" Fill="#7B2CBF"/>
-                <Ellipse Canvas.Left="26" Canvas.Top="282" Width="6" Height="6" Fill="#5FB98A"/>
-                <Rectangle Canvas.Left="62" Canvas.Top="222" Width="16" Height="6" RadiusX="3" RadiusY="3" Fill="#C77DFF">
+                <Ellipse Canvas.Left="40" Canvas.Top="232" Width="12" Height="12" Fill="#E0A94F"/>
+                <Ellipse Canvas.Left="78" Canvas.Top="268" Width="7" Height="7" Fill="#7C5AD9"/>
+                <Ellipse Canvas.Left="26" Canvas.Top="282" Width="6" Height="6" Fill="#5CC98A"/>
+                <Rectangle Canvas.Left="62" Canvas.Top="222" Width="16" Height="6" RadiusX="3" RadiusY="3" Fill="#B5A0F0">
                     <Rectangle.RenderTransform><RotateTransform Angle="-40"/></Rectangle.RenderTransform>
                 </Rectangle>
-                <Rectangle Canvas.Left="100" Canvas.Top="246" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7B2CBF">
+                <Rectangle Canvas.Left="100" Canvas.Top="246" Width="12" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#7C5AD9">
                     <Rectangle.RenderTransform><RotateTransform Angle="20"/></Rectangle.RenderTransform>
                 </Rectangle>
             </Canvas>
 
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,24">
-                <TextBlock Text="Fest Agenda" FontFamily="{StaticResource FonteMarca}" FontSize="52" Foreground="#F2EEF7"
+                <TextBlock Text="Fest Agenda" FontFamily="{StaticResource FonteMarca}" FontSize="52" Foreground="#ECECEF"
                            HorizontalAlignment="Center"/>
-                <TextBlock Text="AGENDA DE FESTAS E EVENTOS" FontSize="11" FontWeight="SemiBold" Foreground="#C77DFF"
+                <TextBlock Text="AGENDA DE FESTAS E EVENTOS" FontSize="11" FontWeight="SemiBold" Foreground="#B5A0F0"
                            HorizontalAlignment="Center" Margin="0,2,0,0"/>
 
                 <StackPanel x:Name="PainelProgresso" Margin="0,28,0,0" Width="240">
                     <ProgressBar x:Name="Progresso" Style="{StaticResource BarraProgresso}" Maximum="100"/>
-                    <TextBlock x:Name="TxtPasso" Text="Iniciando..." FontSize="12" Foreground="#A99BB8"
+                    <TextBlock x:Name="TxtPasso" Text="Iniciando..." FontSize="12" Foreground="#A1A1AA"
                                HorizontalAlignment="Center" Margin="0,10,0,0"/>
                 </StackPanel>
 
                 <StackPanel x:Name="PainelErro" Margin="0,20,0,0" Visibility="Collapsed" Width="480">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <ctl:Icone Dados="{StaticResource IconeAlerta}" Foreground="#E27272" Width="16" Height="16" Margin="0,0,8,0"/>
-                        <TextBlock x:Name="TxtErroTitulo" Text="Não foi possível abrir o sistema" FontWeight="SemiBold" Foreground="#E27272"/>
+                        <ctl:Icone Dados="{StaticResource IconeAlerta}" Foreground="#F27474" Width="16" Height="16" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="TxtErroTitulo" Text="Não foi possível abrir o sistema" FontWeight="SemiBold" Foreground="#F27474"/>
                     </StackPanel>
-                    <TextBlock x:Name="TxtErro" FontSize="12" Foreground="#A99BB8" TextWrapping="Wrap" TextAlignment="Center"
+                    <TextBlock x:Name="TxtErro" FontSize="12" Foreground="#A1A1AA" TextWrapping="Wrap" TextAlignment="Center"
                                Margin="0,6,0,12" MaxHeight="48" TextTrimming="CharacterEllipsis"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="Configurar conexão" Margin="0,0,8,0" MinHeight="32" Click="BtnConfigurar_Click"/>
@@ -90,7 +90,7 @@
             <!-- Rodapé: UnC discreta à esquerda, versão à direita -->
             <Image Source="pack://application:,,,/Assets/Brand/unc_logo_branca.png" Height="20" Stretch="Uniform" Opacity="0.75"
                    RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="20,0,0,16"/>
-            <TextBlock x:Name="TxtVersao" FontSize="11" Foreground="#A99BB8" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+            <TextBlock x:Name="TxtVersao" FontSize="11" Foreground="#A1A1AA" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                        Margin="0,0,20,18"/>
         </Grid>
     </Border>

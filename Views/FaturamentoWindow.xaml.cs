@@ -95,7 +95,7 @@ namespace EspacoFestas.Views
 
             if (quantidade > 1 && !Especie.PermiteParcelamento)
             {
-                MostrarErro($"{Especie.Descricao} não permite parcelamento (RN15).");
+                MostrarErro($"{Especie.Descricao} não permite parcelamento.");
                 return;
             }
 
@@ -143,7 +143,8 @@ namespace EspacoFestas.Views
                     return;
                 }
 
-                plano.Add(new ParcelaPlano(linha.Numero, vencimento.Value, linha.Valor, linha.RecebidaHoje));
+                // Parcela recebida hoje vence hoje, mesmo que a data tenha sido editada na grade
+                plano.Add(new ParcelaPlano(linha.Numero, linha.RecebidaHoje ? DateTime.Today : vencimento.Value, linha.Valor, linha.RecebidaHoje));
             }
 
             try

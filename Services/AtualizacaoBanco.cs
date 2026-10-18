@@ -28,7 +28,9 @@ public static class AtualizacaoBanco
             "SELECT COUNT(*) FROM RDB$RELATION_FIELDS WHERE RDB$RELATION_NAME = 'CONFIGURACAO' AND RDB$FIELD_NAME = 'CAMINHO_LOGO_EMPRESA'"),
         new("alteracoes-2026-10-04.sql", "tamanhos dos campos e telefone só com dígitos",
             "SELECT COUNT(*) FROM RDB$RELATION_FIELDS R JOIN RDB$FIELDS F ON F.RDB$FIELD_NAME = R.RDB$FIELD_SOURCE " +
-            "WHERE R.RDB$RELATION_NAME = 'CLIENTE' AND R.RDB$FIELD_NAME = 'TELEFONE' AND F.RDB$CHARACTER_LENGTH = 11")
+            "WHERE R.RDB$RELATION_NAME = 'CLIENTE' AND R.RDB$FIELD_NAME = 'TELEFONE' AND F.RDB$CHARACTER_LENGTH = 11"),
+        new("alteracoes-2026-10-18.sql", "estorno, suprimento e sangria, WhatsApp",
+            "SELECT COUNT(*) FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = 'WHATSAPP_MENSAGEM'")
     ];
 
     private const string ConsultaBaseMinima =

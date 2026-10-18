@@ -119,7 +119,7 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <TextBlock x:Name="VazioFaixas" Text="Nenhuma faixa ainda. O serviço só aparece para agendar com pelo menos uma faixa ativa (RN03)."
+                        <TextBlock x:Name="VazioFaixas" Text="Nenhuma faixa ainda. O serviço só aparece para agendar com pelo menos uma faixa ativa."
                                    Style="{StaticResource TextoAuxiliar}" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
@@ -227,10 +227,9 @@
                 </StackPanel>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <Border x:Name="AvisoCompartilhado" Style="{StaticResource SeloOrcamento}" HorizontalAlignment="Stretch"
-                                Padding="12,10" Margin="0,0,0,16" CornerRadius="8" Visibility="Collapsed">
+                        <Border x:Name="AvisoCompartilhado" Style="{StaticResource Aviso}" Margin="0,0,0,16" Visibility="Collapsed">
                             <DockPanel>
-                                <ctl:Icone DockPanel.Dock="Left" Dados="{StaticResource IconeAlerta}" Foreground="{DynamicResource CorOrcamento}"
+                                <ctl:Icone DockPanel.Dock="Left" Dados="{StaticResource IconeInfo}" Foreground="{DynamicResource CorTextoSecundario}"
                                            Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Top"/>
                                 <TextBlock x:Name="TxtAvisoCompartilhado" TextWrapping="Wrap" FontWeight="Normal"/>
                             </DockPanel>

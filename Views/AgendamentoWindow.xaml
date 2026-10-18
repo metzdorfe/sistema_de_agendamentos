@@ -261,6 +261,39 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <!-- RF16: lucro do evento, só depois de faturado -->
+                    <Border x:Name="PainelLucro" Style="{StaticResource Cartao}" Padding="16" Margin="0,24,0,0" Visibility="Collapsed">
+                        <StackPanel Typography.NumeralAlignment="Tabular">
+                            <TextBlock Text="Lucro do evento" Style="{StaticResource TextoTituloSecao}"/>
+                            <TextBlock x:Name="TxtLucroAviso" Style="{StaticResource TextoAuxiliar}" TextWrapping="Wrap" Margin="0,4,0,12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Receita (total do evento)" Margin="0,0,0,6"/>
+                                <TextBlock x:Name="TxtLucroReceita" Grid.Column="1" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="1" Text="Custo dos adicionais" Margin="0,0,0,6"/>
+                                <TextBlock x:Name="TxtLucroCusto" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="2" Text="Despesas lançadas no caixa" Margin="0,0,0,10"/>
+                                <TextBlock x:Name="TxtLucroDespesas" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,1,0,0" Padding="0,10,0,0">
+                                    <DockPanel>
+                                        <TextBlock x:Name="TxtLucro" DockPanel.Dock="Right" FontSize="18" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Lucro" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </Border>
+                            </Grid>
+                            <ItemsControl x:Name="ListaDespesas" Margin="0,12,0,0"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
 
@@ -315,6 +348,9 @@
                         <Button x:Name="BtnCancelarAgendamento" DockPanel.Dock="Left" Style="{StaticResource BotaoPerigo}"
                                 Content="Cancelar agendamento" Visibility="Collapsed" ToolTipService.ShowOnDisabled="True"
                                 Click="BtnCancelarAgendamento_Click"/>
+                        <!-- RF29: resumo para o cliente pelo WhatsApp (só depois de salvo) -->
+                        <Button x:Name="BtnWhatsapp" DockPanel.Dock="Left" Content="Enviar por WhatsApp" Margin="8,0,0,0" Visibility="Collapsed"
+                                ToolTip="Envia o resumo para o cliente, com prévia do texto" Click="BtnWhatsapp_Click"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button x:Name="BtnCancelar" Content="Cancelar" Style="{StaticResource BotaoFantasma}" Margin="0,0,8,0" Click="BtnCancelar_Click"/>
                             <Button x:Name="BtnSalvarOrcamento" Content="Salvar orçamento" Margin="0,0,8,0" Click="BtnSalvarOrcamento_Click"/>

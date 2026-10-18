@@ -8,9 +8,10 @@
 ;   config.ini     conexão com o banco      (só na 1ª instalação; nunca desinstalado)
 ;   BD\            basefestagenda.fdb           (só na 1ª instalação; nunca desinstalado)
 ;   Arquivos\      imagens do sistema       (nunca desinstalado)
-;   Log\           RelatorioLog.log         (nunca desinstalado)
+;   Log\           RelatorioLog.log, Erros.log, whatsapp.log (nunca desinstalado)
 ;   Utilitarios\   backup, restauração, verificação, isql, scripts SQL
-;   Licencas\      Firebird (IDPL/IPL) e fontes Inter e Pacifico (SIL OFL)
+;   Whatsapp\      node\ (Node portátil), server\ (Baileys + node_modules), sessao\ (login; nunca sobrescrito nem desinstalado)
+;   Licencas\      Firebird (IDPL/IPL), fontes Inter e Pacifico (SIL OFL), Node e Baileys (MIT)
 ;
 ; Atualização por cima: depois de copiar os arquivos, roda "FestAgenda.exe --atualizar-banco",
 ; que faz backup do banco (Utilitarios\Backups) e aplica os alteracoes-*.sql que faltam.
@@ -81,10 +82,13 @@ Name: "{app}\Arquivos\Empresa"; Permissions: users-modify; Flags: uninsneverunin
 ; Log dos relatórios (RN31): o sistema anexa uma linha a cada geração
 Name: "{app}\Log"; Permissions: users-modify; Flags: uninsneveruninstall
 Name: "{app}\Utilitarios\Backups"; Permissions: users-modify; Flags: uninsneveruninstall
+; PDFs enviados pelo WhatsApp (catálogo) e sessão do WhatsApp (login por QR): o sistema grava; atualizar e desinstalar não apagam
+Name: "{app}\Arquivos\WhatsApp"; Permissions: users-modify; Flags: uninsneveruninstall
+Name: "{app}\Whatsapp\sessao"; Permissions: users-modify; Flags: uninsneveruninstall
 
 [Files]
 ; Sistema, DLLs, Firebird embarcado e utilitários: sempre atualizados
-Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "config.ini"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "config.ini,\Whatsapp\sessao\*"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; config.ini e banco: só na primeira instalação; atualizar e desinstalar não mexem neles
 Source: "{#PublishDir}\config.exemplo.ini"; DestDir: "{app}"; DestName: "config.ini"; Permissions: users-modify; Flags: onlyifdoesntexist uninsneveruninstall
 Source: "{#BancoVazio}"; DestDir: "{app}\BD"; Permissions: users-modify; Flags: onlyifdoesntexist uninsneveruninstall
@@ -124,4 +128,4 @@ brazilianportuguese.WelcomeLabel2=Este assistente vai instalar o [name/ver] nest
 brazilianportuguese.FinishedHeadingLabel=Fest Agenda instalado
 brazilianportuguese.FinishedLabelNoIcons=O [name] foi instalado neste computador.
 brazilianportuguese.FinishedLabel=O [name] foi instalado neste computador e pode ser aberto pelos atalhos criados.
-brazilianportuguese.UninstalledMost=O %1 foi removido.%n%nOs dados foram mantidos: as pastas BD (banco de dados), Arquivos, Log e o config.ini continuam na pasta do sistema. Apague-as manualmente se não precisar mais delas.
+brazilianportuguese.UninstalledMost=O %1 foi removido.%n%nOs dados foram mantidos: as pastas BD (banco de dados), Arquivos, Log, Whatsapp\sessao (login do WhatsApp) e o config.ini continuam na pasta do sistema. Apague-as manualmente se não precisar mais delas.

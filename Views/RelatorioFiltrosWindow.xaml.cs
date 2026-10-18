@@ -34,6 +34,7 @@ namespace EspacoFestas.Views
             PainelStatus.Visibility = Visivel(campos.HasFlag(CamposFiltro.Status));
             PainelServico.Visibility = Visivel(campos.HasFlag(CamposFiltro.Servico));
             BtnXlsx.Visibility = Visivel(relatorio.GeraXlsx);
+            BtnWhatsapp.Visibility = Visivel(relatorio is RelatorioCatalogo);
 
             // Período padrão: o mês atual
             var inicioMes = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
@@ -198,6 +199,30 @@ namespace EspacoFestas.Views
         private void BtnPdf_Click(object sender, RoutedEventArgs e) => Gerar(Pdf);
 
         private void BtnXlsx_Click(object sender, RoutedEventArgs e) => Gerar(Xlsx);
+
+        /// <summary>RF28: catálogo com os filtros escolhidos, enviado a um cliente pelo WhatsApp.</summary>
+        private void BtnWhatsapp_Click(object sender, RoutedEventArgs e)
+        {
+            var filtros = LerFiltros();
+            if (filtros is null)
+            {
+                return;
+            }
+
+            if (!_relatorio.TemDados(filtros))
+            {
+                MostrarMensagem("Nenhum serviço para os filtros informados.");
+                return;
+            }
+
+            var janela = EnvioWhatsappWindow.Catalogo(servicoId: filtros.ServicoId);
+            janela.Owner = this;
+            janela.ShowDialog();
+            if (janela.Enviou)
+            {
+                Dialogo.Avisar("Catálogo enviado", "O catálogo foi enviado para o cliente pelo WhatsApp.");
+            }
+        }
 
         private void BtnCalendarioDe_Click(object sender, RoutedEventArgs e) => SeletorData.Abrir(TxtDe, CaixaDe);
 

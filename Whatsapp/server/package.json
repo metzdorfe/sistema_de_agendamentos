@@ -1,0 +1,18 @@
+{
+  "name": "festagenda-whatsapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor local do WhatsApp do Fest Agenda (Baileys). Escuta só em 127.0.0.1, com token.",
+  "type": "module",
+  "main": "src/servidor.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/servidor.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc14"
+  }
+}

@@ -2,11 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:ctl="clr-namespace:EspacoFestas.Controls">
     <!-- Estilos comuns aos dois temas. Cores sempre por {DynamicResource ...} (Dark.xaml / Light.xaml).
-         Espaçamento em múltiplos de 8; cantos 8px em botões e inputs, 12px em cards e painéis. -->
+         Visual: base neutra, roxo só em ação/destaque; controles com 36 px de altura; cantos 8 px em botões e
+         campos, 12 px em cartões; foco com anel translúcido; espaçamento em múltiplos de 4. -->
 
-    <FontFamily x:Key="FonteInter">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
+    <!-- Caminho relativo a este arquivo (Themes/): a forma "pack://application:,,,/Assets/Fonts/#..." não achava as fontes
+         embutidas e o WPF caía numa fonte do sistema -->
+    <FontFamily x:Key="FonteInter">../Assets/Fonts/#Inter</FontFamily>
     <!-- Só o nome "Fest Agenda" (navbar, splash, Sobre): Pacifico, SIL OFL 1.1 (Assets/Fonts/OFL-Pacifico.txt) -->
-    <FontFamily x:Key="FonteMarca">pack://application:,,,/Assets/Fonts/#Pacifico</FontFamily>
+    <FontFamily x:Key="FonteMarca">../Assets/Fonts/#Pacifico</FontFamily>
 
     <!-- Marca: logo da UnC pela chave ImagemLogoUnc (definida em cada tema: colorida no claro, branca no escuro). -->
 
@@ -36,7 +39,7 @@
     <!-- Textos                                                                -->
     <!-- ===================================================================== -->
     <Style x:Key="TextoTituloTela" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontSize" Value="22"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
     </Style>
@@ -52,9 +55,10 @@
         <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
     </Style>
     <Style x:Key="TextoRotulo" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
-        <Setter Property="Margin" Value="0,0,0,8"/>
+        <Setter Property="Margin" Value="0,0,0,6"/>
     </Style>
     <Style x:Key="TextoAuxiliar" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12"/>
@@ -79,12 +83,13 @@
         <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="Padding" Value="24"/>
+        <Setter Property="Padding" Value="20"/>
     </Style>
 
+    <!-- Selo em pílula -->
     <Style x:Key="Selo" TargetType="Border">
-        <Setter Property="CornerRadius" Value="6"/>
-        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="8,2"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
@@ -114,6 +119,15 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="TextElement.Foreground" Value="{DynamicResource CorOrcamento}"/>
     </Style>
+    <!-- Caixa de aviso neutra (informação, não alarme): cinza, texto secundário, largura toda -->
+    <Style x:Key="Aviso" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource CorTextoSecundario}"/>
+        <Setter Property="TextElement.FontSize" Value="13"/>
+    </Style>
+
     <Style x:Key="SeloErro" TargetType="Border" BasedOn="{StaticResource Selo}">
         <Setter Property="Background" Value="{DynamicResource CorErroFundo}"/>
         <Setter Property="TextElement.Foreground" Value="{DynamicResource CorErro}"/>
@@ -175,16 +189,16 @@
         </Setter>
     </Style>
 
-    <!-- Padrão: botão secundário (contorno) -->
+    <!-- Padrão: botão secundário (fundo de cartão com borda) -->
     <Style TargetType="Button">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="MinHeight" Value="40"/>
-        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="Padding" Value="14,0"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocoTeclado}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Background" Value="{DynamicResource CorSuperficie}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
@@ -202,6 +216,7 @@
     </Style>
 
     <Style x:Key="BotaoPerigo" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CorErro}"/>
         <Setter Property="Foreground" Value="{DynamicResource CorErro}"/>
         <Setter Property="ctl:Estilo.CorHover" Value="{DynamicResource CorErroFundo}"/>
@@ -209,6 +224,7 @@
 
     <!-- Sem fundo nem borda: ações discretas e botões de ícone -->
     <Style x:Key="BotaoFantasma" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
         <Setter Property="Padding" Value="8,0"/>
@@ -231,10 +247,10 @@
     <!-- ===================================================================== -->
     <Style TargetType="TextBox">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="36"/>
         <Setter Property="Padding" Value="12,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+        <Setter Property="Background" Value="{DynamicResource CorSuperficie}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
         <Setter Property="CaretBrush" Value="{DynamicResource CorTexto}"/>
@@ -245,6 +261,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Grid>
+                        <!-- Anel de foco: por fora do campo, sem mexer no layout -->
+                        <Border x:Name="Anel" BorderBrush="{DynamicResource CorFocoAnel}" BorderThickness="3" CornerRadius="10" Margin="-3"
+                                IsHitTestVisible="False" Visibility="Hidden"/>
                         <Border x:Name="Borda" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="1" CornerRadius="8" SnapsToDevicePixels="True">
                             <!-- O TextBox já aplica o Padding no PART_ContentHost; a dica usa o mesmo Padding para alinhar -->
@@ -277,13 +296,16 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorFoco}"/>
+                            <Setter TargetName="Anel" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsReadOnly" Value="True">
-                            <Setter TargetName="Borda" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="Borda" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                            <Setter TargetName="Anel" Property="Visibility" Value="Hidden"/>
                         </Trigger>
                         <!-- Validação inline: borda vermelha (vence hover e foco por vir depois) -->
                         <Trigger Property="ctl:Estilo.Erro" Value="True">
                             <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorErro}"/>
+                            <Setter TargetName="Anel" Property="BorderBrush" Value="{DynamicResource CorErroFundo}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
@@ -307,6 +329,47 @@
         <Setter Property="MinHeight" Value="72"/>
     </Style>
 
+    <!-- Editor de texto com campos (modelos de mensagem): mesmo visual do TextBox -->
+    <Style TargetType="RichTextBox">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="8,8"/>
+        <Setter Property="Background" Value="{DynamicResource CorSuperficie}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource CorBotaoPrincipalHover}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RichTextBox">
+                    <Grid>
+                        <Border x:Name="Anel" BorderBrush="{DynamicResource CorFocoAnel}" BorderThickness="3" CornerRadius="10" Margin="-3"
+                                IsHitTestVisible="False" Visibility="Hidden"/>
+                        <Border x:Name="Borda" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="8" SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" Focusable="False"
+                                          HorizontalScrollBarVisibility="Disabled"/>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoSecundario}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorFoco}"/>
+                            <Setter TargetName="Anel" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="ctl:Estilo.Erro" Value="True">
+                            <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorErro}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ===================================================================== -->
     <!-- ComboBox                                                              -->
     <!-- ===================================================================== -->
@@ -316,18 +379,23 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="Borda" Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}"
-                            BorderThickness="1" CornerRadius="8" SnapsToDevicePixels="True">
-                        <Path x:Name="Seta" Data="M 0 0 L 4 4 L 8 0" Stroke="{DynamicResource CorTextoSecundario}" StrokeThickness="1.5"
-                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                              HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0"/>
-                    </Border>
+                    <Grid>
+                        <Border x:Name="Anel" BorderBrush="{DynamicResource CorFocoAnel}" BorderThickness="3" CornerRadius="10" Margin="-3"
+                                IsHitTestVisible="False" Visibility="Hidden"/>
+                        <Border x:Name="Borda" Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}"
+                                BorderThickness="1" CornerRadius="8" SnapsToDevicePixels="True">
+                            <Path x:Name="Seta" Data="M 0 0 L 4 4 L 8 0" Stroke="{DynamicResource CorTextoSecundario}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                        </Border>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorBotaoSecundario}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Borda" Property="BorderBrush" Value="{DynamicResource CorFoco}"/>
+                            <Setter TargetName="Anel" Property="Visibility" Value="Visible"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -337,7 +405,7 @@
 
     <Style TargetType="ComboBox">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="36"/>
         <Setter Property="Padding" Value="12,0,32,0"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -358,12 +426,17 @@
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                           ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"/>
+                        <!-- Margem em volta da lista: espaço para a sombra (o HorizontalOffset compensa a margem esquerda) -->
                         <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True"
-                               Focusable="False" PopupAnimation="Fade">
+                               Focusable="False" PopupAnimation="Fade" HorizontalOffset="-12">
                             <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="1"
-                                    CornerRadius="8" Padding="4" Margin="0,4,0,0"
+                                    CornerRadius="10" Padding="4" Margin="12,6,12,16"
                                     MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                <Border.Effect>
+                                    <!-- Sombra é sempre preta (só muda a intensidade percebida em cada tema) -->
+                                    <DropShadowEffect BlurRadius="16" ShadowDepth="4" Direction="270" Opacity="0.14" Color="#000000"/>
+                                </Border.Effect>
                                 <ScrollViewer>
                                     <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
                                 </ScrollViewer>
@@ -401,7 +474,9 @@
                             <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSelecao}"/>
                             <Setter Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -421,8 +496,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
-                        <Border x:Name="Caixa" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
-                                Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}">
+                        <Border x:Name="Caixa" Width="18" Height="18" CornerRadius="5" BorderThickness="1.5"
+                                Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBotaoSecundario}">
                             <Path x:Name="Marca" Data="M 1 5 L 4.5 8.5 L 11 1" Stroke="{DynamicResource CorTextoSobrePrincipal}" StrokeThickness="2"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
@@ -452,10 +527,11 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
-                        <Border x:Name="Trilho" Width="40" Height="22" CornerRadius="11" BorderThickness="1"
-                                Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}">
-                            <Ellipse x:Name="Botao" Width="16" Height="16" Margin="2,0" HorizontalAlignment="Left"
-                                     Fill="{DynamicResource CorTextoSecundario}">
+                        <!-- Desligado: trilho cinza; ligado: trilho roxo. Bolinha sempre branca -->
+                        <Border x:Name="Trilho" Width="40" Height="22" CornerRadius="11" BorderThickness="0"
+                                Background="{DynamicResource CorBotaoSecundario}">
+                            <Ellipse x:Name="Botao" Width="18" Height="18" Margin="2,0" HorizontalAlignment="Left"
+                                     Fill="{DynamicResource CorTextoSobrePrincipal}">
                                 <Ellipse.RenderTransform>
                                     <TranslateTransform x:Name="Deslocamento" X="0"/>
                                 </Ellipse.RenderTransform>
@@ -466,8 +542,6 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Trilho" Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
-                            <Setter TargetName="Trilho" Property="BorderBrush" Value="{DynamicResource CorBotaoPrincipal}"/>
-                            <Setter TargetName="Botao" Property="Fill" Value="{DynamicResource CorTextoSobrePrincipal}"/>
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
@@ -493,14 +567,14 @@
     </Style>
 
     <!-- ===================================================================== -->
-    <!-- Navbar (RadioButton; Tag = ícone). Ativo: barrinha à esquerda na cor de destaque + superfície elevada -->
+    <!-- Navbar (RadioButton; Tag = ícone). Ativo: fundo roxo bem claro, ícone e texto na cor de destaque -->
     <!-- ===================================================================== -->
     <Style x:Key="ItemNavbar" TargetType="RadioButton">
         <Setter Property="GroupName" Value="Navbar"/>
         <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Height" Value="40"/>
+        <Setter Property="Height" Value="38"/>
         <Setter Property="Margin" Value="0,2"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -510,10 +584,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <Grid Background="Transparent">
-                        <Border x:Name="Fundo" CornerRadius="8" Background="{DynamicResource CorSuperficieElevada}" Opacity="0"/>
-                        <Border x:Name="Barra" Width="3" Height="18" CornerRadius="2" HorizontalAlignment="Left"
-                                Background="{DynamicResource CorDestaque}" Visibility="Hidden"/>
-                        <StackPanel x:Name="Conteudo" Orientation="Horizontal" Margin="16,0" VerticalAlignment="Center">
+                        <Border x:Name="Fundo" CornerRadius="8" Background="Transparent"/>
+                        <StackPanel x:Name="Conteudo" Orientation="Horizontal" Margin="14,0" VerticalAlignment="Center">
                             <ctl:Icone x:Name="Icone" Dados="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
                                        Foreground="{TemplateBinding Foreground}"/>
                             <ContentPresenter x:Name="Texto" Margin="12,0,0,0" VerticalAlignment="Center"/>
@@ -521,14 +593,13 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Fundo" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
                             <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Fundo" Property="Opacity" Value="1"/>
-                            <Setter TargetName="Barra" Property="Visibility" Value="Visible"/>
-                            <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
-                            <Setter TargetName="Icone" Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorPrincipalFundo}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
                         <Trigger Property="ctl:Navbar.Recolhida" Value="True">
                             <Setter TargetName="Texto" Property="Visibility" Value="Collapsed"/>
@@ -563,6 +634,7 @@
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter Property="Foreground" Value="{DynamicResource CorDestaque}"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -571,14 +643,15 @@
     </Style>
 
     <!-- ===================================================================== -->
-    <!-- Abas segmentadas (Mês/Semana/Dia, abas do Financeiro e das Configurações) -->
+    <!-- Abas segmentadas (Mês/Semana/Dia, abas do Financeiro e das Configurações):
+         trilho cinza e a aba ativa em "pílula" branca, como um seletor -->
     <!-- ===================================================================== -->
     <Style x:Key="GrupoAbas" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource CorSuperficie}"/>
+        <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="10"/>
-        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Padding" Value="3"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
     </Style>
 
@@ -586,13 +659,14 @@
         <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Padding" Value="16,7"/>
+        <Setter Property="Padding" Value="14,6"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Fundo" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fundo" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="7"
+                            Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -600,8 +674,10 @@
                             <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorBotaoPrincipal}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource CorTextoSobrePrincipal}"/>
+                            <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficie}"/>
+                            <Setter TargetName="Fundo" Property="BorderBrush" Value="{DynamicResource CorBorda}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4"/>
@@ -698,7 +774,7 @@
         <Setter Property="GridLinesVisibility" Value="Horizontal"/>
         <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource CorBorda}"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
-        <Setter Property="MinRowHeight" Value="48"/>
+        <Setter Property="MinRowHeight" Value="44"/>
         <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
         <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -707,12 +783,12 @@
     <Style TargetType="DataGridColumnHeader">
         <Setter Property="Foreground" Value="{DynamicResource CorTextoSecundario}"/>
         <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridColumnHeader">
-                    <Border Background="Transparent" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1" Padding="16,12">
+                    <Border Background="Transparent" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1" Padding="16,10">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
                     </Border>
                 </ControlTemplate>
@@ -729,7 +805,7 @@
                 <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                <Setter Property="Background" Value="{DynamicResource CorSelecao}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -788,7 +864,7 @@
                                         <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSuperficieElevada}"/>
+                                        <Setter TargetName="Fundo" Property="Background" Value="{DynamicResource CorSelecao}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -856,14 +932,15 @@
     <!-- ===================================================================== -->
     <!-- ToolTip e menu de contexto                                            -->
     <!-- ===================================================================== -->
+    <!-- Tooltip invertido (escuro no claro, claro no escuro): destaca do conteúdo sem precisar de sombra -->
     <Style TargetType="ToolTip">
-        <Setter Property="Foreground" Value="{DynamicResource CorTexto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CorSuperficie}"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
-                    <Border Background="{DynamicResource CorSuperficieElevada}" BorderBrush="{DynamicResource CorBorda}"
-                            BorderThickness="1" CornerRadius="6" Padding="8,4">
+                    <Border Background="{DynamicResource CorTexto}" CornerRadius="6" Padding="8,5" MaxWidth="320"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter/>
                     </Border>
                 </ControlTemplate>
@@ -878,8 +955,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
-                    <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}"
-                            BorderThickness="1" CornerRadius="8" Padding="4" MinWidth="160">
+                    <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBotaoSecundario}"
+                            BorderThickness="1" CornerRadius="10" Padding="4" MinWidth="180">
                         <ItemsPresenter/>
                     </Border>
                 </ControlTemplate>

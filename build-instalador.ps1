@@ -5,7 +5,9 @@
 #   2. Firebird 5 Embedded na raiz (fbclient.dll, plugins\engine13.dll, intl\, firebird.msg, ICU...)
 #   3. Utilitarios\ (isql, gbak, gfix, .bat, LEIAME.txt, Scripts\*.sql)
 #   4. Banco vazio BD\basefestagenda.fdb com a estrutura e os dados iniciais (criado pelo próprio embarcado)
-#   5. Compila Installer\FestAgenda.iss com o Inno Setup 6 (versão vem do <Version> do .csproj)
+#   5. WhatsApp: Node portátil (versão e SHA-256 fixos abaixo) em Whatsapp\node e o servidor com
+#      node_modules (npm ci --omit=dev) em Whatsapp\server. Precisa de internet e npm só nesta máquina.
+#   6. Compila Installer\FestAgenda.iss com o Inno Setup 6 (versão vem do <Version> do .csproj)
 #
 # Uso:  powershell -ExecutionPolicy Bypass -File build-instalador.ps1
 #       [-FirebirdDir "C:\Program Files\Firebird\Firebird_5_0"]   de onde copiar o Firebird 5 (x64)
@@ -27,6 +29,11 @@ $artefatos = Join-Path $raiz 'artifacts'
 $publicacao = Join-Path $artefatos 'publish'
 $pastaBanco = Join-Path $artefatos 'banco'
 $banco = Join-Path $pastaBanco 'basefestagenda.fdb'
+
+# Node portátil do servidor do WhatsApp: LTS fixada. Para trocar, atualize os dois valores
+# (hash em https://nodejs.org/dist/v<versão>/SHASUMS256.txt, linha node-v<versão>-win-x64.zip).
+$nodeVersao = '24.21.0'
+$nodeSha256 = '158f7685b44de51f6c0df1d153526cbcd3e1bc739a8dfc607721cef75de9e541'
 
 function Passo([string]$texto) { Write-Host "`n==> $texto" -ForegroundColor Cyan }
 
@@ -87,7 +94,9 @@ $util = Join-Path $publicacao 'Utilitarios'
 foreach ($ferramenta in 'isql.exe', 'gbak.exe', 'gfix.exe') {
     Copiar (Join-Path $FirebirdDir $ferramenta) (Join-Path $util $ferramenta)
 }
-Get-ChildItem (Join-Path $raiz 'Installer\Utilitarios') -File | ForEach-Object { Copiar $_.FullName (Join-Path $util $_.Name) }
+# Só os .bat e o LEIAME: a pasta também guarda instaladores de ferramentas da máquina de desenvolvimento, que não vão para a cliente
+Get-ChildItem (Join-Path $raiz 'Installer\Utilitarios') -File | Where-Object { $_.Extension -in '.bat', '.txt' } |
+    ForEach-Object { Copiar $_.FullName (Join-Path $util $_.Name) }
 foreach ($script in 'schema.sql', 'dados-iniciais.sql') {
     Copiar (Join-Path $raiz "Database\$script") (Join-Path $util "Scripts\$script")
 }
@@ -121,6 +130,43 @@ finally {
     Remove-Item $criar -ErrorAction SilentlyContinue
 }
 Write-Host "Banco criado: $banco ($([math]::Round((Get-Item $banco).Length / 1KB)) KB)"
+
+# ---------------------------------------------------------------------------
+Passo "WhatsApp: Node $nodeVersao portátil e servidor"
+$pastaWhatsapp = Join-Path $publicacao 'Whatsapp'
+$cache = Join-Path $artefatos 'cache'
+$zipNode = Join-Path $cache "node-v$nodeVersao-win-x64.zip"
+New-Item -ItemType Directory -Force -Path $cache | Out-Null
+if (-not (Test-Path $zipNode)) {
+    Invoke-WebRequest "https://nodejs.org/dist/v$nodeVersao/node-v$nodeVersao-win-x64.zip" -OutFile $zipNode
+}
+$hash = (Get-FileHash $zipNode -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($hash -ne $nodeSha256) {
+    Remove-Item $zipNode -Force
+    throw "SHA-256 do Node não confere (esperado $nodeSha256, veio $hash). Download corrompido ou adulterado."
+}
+
+$extraido = Join-Path $cache "node-v$nodeVersao-win-x64"
+if (-not (Test-Path $extraido)) { Expand-Archive $zipNode -DestinationPath $cache -Force }
+Copiar (Join-Path $extraido 'node.exe') (Join-Path $pastaWhatsapp 'node\node.exe')
+Copiar (Join-Path $extraido 'LICENSE') (Join-Path $publicacao 'Licencas\Node\LICENSE.txt')
+
+# Servidor: só o código e as dependências de produção, nas versões travadas do package-lock.json (nunca a sessão)
+$servidor = Join-Path $pastaWhatsapp 'server'
+foreach ($arquivo in 'package.json', 'package-lock.json') {
+    Copiar (Join-Path $raiz "Whatsapp\server\$arquivo") (Join-Path $servidor $arquivo)
+}
+Copy-Item (Join-Path $raiz 'Whatsapp\server\src') (Join-Path $servidor 'src') -Recurse -Force
+Push-Location $servidor
+try {
+    npm ci --omit=dev --no-audit --no-fund
+    if ($LASTEXITCODE -ne 0) { throw 'npm ci falhou no servidor do WhatsApp.' }
+}
+finally {
+    Pop-Location
+}
+Copiar (Join-Path $servidor 'node_modules\@whiskeysockets\baileys\LICENSE') (Join-Path $publicacao 'Licencas\Baileys\LICENSE.txt')
+Write-Host "WhatsApp: $([math]::Round((Get-ChildItem $pastaWhatsapp -Recurse -File | Measure-Object Length -Sum).Sum / 1MB, 1)) MB"
 
 if ($SemInstalador) {
     Write-Host "`nPublicação em $publicacao (instalador não gerado: -SemInstalador)." -ForegroundColor Green

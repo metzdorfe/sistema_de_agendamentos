@@ -28,8 +28,6 @@ namespace EspacoFestas.Views
             {
                 GradeRelatorios.Children.Add(CriarCartao(relatorio));
             }
-
-            TxtLog.Text = $"Cada relatório gerado (ou que falhou) fica registrado em {RelatorioLog.Caminho}.";
         }
 
         private static Border CriarCartao(IRelatorio relatorio)

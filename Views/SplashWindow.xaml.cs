@@ -53,6 +53,13 @@ namespace EspacoFestas.Views
                 await Task.Delay(restante > TimeSpan.FromMilliseconds(250) ? restante : TimeSpan.FromMilliseconds(250));
 
                 TemaService.Aplicar(App.Sistema.Tema);
+
+                // WhatsApp ligado: sobe o servidor em segundo plano; se falhar, o sistema abre igual (RN30)
+                if (App.Sistema.WhatsappAtivo)
+                {
+                    _ = Services.Whatsapp.WhatsappServidor.Atual.IniciarAsync();
+                }
+
                 var principal = new MainWindow();
                 Application.Current.MainWindow = principal;
                 Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
@@ -61,6 +68,7 @@ namespace EspacoFestas.Views
             }
             catch (Exception ex)
             {
+                ErroLog.Registrar(ex, "Splash");
                 MostrarErro(ex);
             }
         }

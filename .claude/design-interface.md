@@ -3,7 +3,8 @@
 > **Criado em 29/09/2026.** Direção visual e estrutura das telas, para guiar o desenho no Figma e depois o WPF. Regras de negócio no `fluxo-sistema.md`; banco no `modelagem-banco.md`; stack no `stack-projeto.md`.
 > **Atualizado em 29/09/2026:** revisão do primeiro protótipo no Figma, opção de **tema claro ou escuro** e mudanças no banco aprovadas pelo grupo.
 > **Atualizado em 30/09/2026:** sistema passa a se chamar **Fest Agenda**; logo da **UnC** no lugar dos balões (navbar, splash, ícone); visual **clean** sem neon (base neutra + azul da UnC como única cor de destaque); **tema claro é o padrão**; splash clara, sem o crédito da UnC; "Gerar catálogo" saiu da tela do serviço; **agendamento em popup**.
-> **Atualizado em 04/10/2026 (ajustes v2, vale sobre o que está acima):** volta a **paleta roxa**, sem glow e sem gradiente; a navbar acompanha o tema; logo da UnC **branca no escuro** e colorida no claro; **splash sempre escura** com a logo branca; ícone com a marca branca sobre quadrado roxo; Agenda com **Semana e Dia**; popup de filtros dos relatórios; nova tela Sobre. A aba WhatsApp está pendente.
+> **Atualizado em 04/10/2026 (ajustes v2, vale sobre o que está acima):** volta a **paleta roxa**, sem glow e sem gradiente; a navbar acompanha o tema; logo da UnC **branca no escuro** e colorida no claro; **splash sempre escura** com a logo branca; ícone com a marca branca sobre quadrado roxo; Agenda com **Semana e Dia**; popup de filtros dos relatórios; nova tela Sobre. A aba WhatsApp entrou em 18/10/2026 (ver o fim deste documento).
+> **Atualizado em 18/10/2026 (vale sobre tudo acima):** paleta **neutra com roxo suave**. Fundos e bordas em cinzas frios (claro: fundo #F7F7F8, cartão #FFFFFF, borda #E4E4E7, texto #1C1B22) ou grafite (escuro: fundo #121214, cartão #1B1B1F, borda #2E2E35, texto #ECECEF); roxo só no botão principal, item ativo da navbar, foco e seleção (#6D3FC0 no claro, #7C5AD9 no escuro). Componentes: altura 36 px, campos brancos com anel de foco roxo translúcido, abas segmentadas com a ativa em "pílula" branca sobre trilho cinza, navbar com o item ativo em fundo roxo bem claro, selos em pílula, tooltip invertido, linhas de tabela com 44 px. Splash, ícone e imagens do instalador regenerados em grafite (`Tools/gerar-marca.ps1`).
 
 > **Atualizado em 04/10/2026 (noite):** o nome **Fest Agenda** passa a usar a fonte **Pacifico** (só o nome: navbar, splash e Sobre; o resto continua em Inter); splash redesenhada (560×340, confete em formas sólidas, nome grande, frase de apoio, UnC discreta no rodapé); popups de **faturamento** e de **quitar parcela**.
 
@@ -258,7 +259,7 @@ Abre como **janela modal por cima da tela atual**, a partir de "+ Novo Agendamen
 
 ### Clientes
 
-**Lista:** busca por nome, telefone ou CPF/CNPJ (só os dígitos); colunas Nome, Telefone (formatado), CPF/CNPJ e ações. CPF/CNPJ vazio mostra **"CPF/CNPJ não informado"** em cinza e itálico (só exibição, nunca gravado). A ação "Enviar catálogo" depende do WhatsApp (pendente).
+**Lista:** busca por nome, telefone ou CPF/CNPJ (só os dígitos); colunas Nome, Telefone (formatado), CPF/CNPJ e ações. CPF/CNPJ vazio mostra **"CPF/CNPJ não informado"** em cinza e itálico (só exibição, nunca gravado). A ação "Enviar catálogo pelo WhatsApp" fica no menu (⋮) de cada cliente.
 
 **Campos:** máscaras reutilizáveis (`Controls/Mascara.cs`: telefone, CPF/CNPJ dinâmico, CEP, hora, data, inteiro, moeda, percentual) que bloqueiam a digitação inválida e limpam o texto colado; CPF/CNPJ conferido ao sair do campo; data com calendário próprio no tema (`Controls/SeletorData.cs`).
 
@@ -422,5 +423,8 @@ Resumo do que ajustar no Figma:
 - [ ] Biblioteca de controles do WPF (WPF-UI, MaterialDesignInXamlToolkit ou tema Fluent nativo) — precisa suportar troca de tema em tempo de execução; DataGrid, ComboBox e DatePicker padrão ficam ruins no escuro.
 - [x] Logo da UnC aplicada (PNG azul sem fundo, `Assets/Brand/`). Ainda vale confirmar se há manual de marca da UnC para projetos acadêmicos.
 - [x] Catálogo em PDF: cartão em Relatórios (04/10/2026); o botão da lista de Serviços continua.
-- [ ] Aba **WhatsApp** em Configurações (QR code; conectado = QR borrado + caixa verde "Logado ✔" + "Envios"; "Desconectar" discreto) e popup pós-"Salvar orçamento": pendentes até decidir o serviço de envio.
+- [x] Aba **WhatsApp** em Configurações (18/10/2026): aviso do risco da biblioteca não oficial, interruptor "Usar o WhatsApp", limite por dia, estado em texto (selo verde quando conectado), QR code com a instrução do celular enquanto aguarda, "Conectar" / "Desconectar" (pede confirmação), mensagens padrão com prévia e "Mensagens enviadas" (filtro e "Reenviar" para falhas). O QR some ao conectar, em vez do "QR borrado" do protótipo.
+- [x] Popup **Enviar pelo WhatsApp** (orçamento e catálogo): estado da conexão, cliente (escolhido na lista, no catálogo), motivo quando o cliente não pode receber, texto editável, "Copiar texto" e "Enviar". Depois de "Salvar orçamento", pergunta se quer enviar (RF30).
+- [x] Popup de agendamento faturado: cartão **Lucro do evento** (receita, custo dos adicionais, despesas e lucro, com a lista das despesas).
+- [x] Caixa: **Novo lançamento** (saída, entrada, suprimento, sangria; despesa do evento) e **Estornar**; Contas a receber: **Estornar baixa**.
 - [ ] Telas ainda não desenhadas: faturamento, contas a receber, caixa, relatórios. (Agendamento: feito como popup em 30/09/2026.)

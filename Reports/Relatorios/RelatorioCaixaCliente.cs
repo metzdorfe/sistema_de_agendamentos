@@ -35,10 +35,11 @@ public sealed class RelatorioCaixaCliente : RelatorioTabular
         var de = filtros.De!.Value;
         var ate = filtros.Ate!.Value;
 
-        // Entrada ligada direto ao agendamento (sinal, à vista) ou à parcela (baixa)
+        // Entrada ligada direto ao agendamento (sinal, à vista) ou à parcela (baixa); estornadas ficam fora
         var entradas = contexto.Financeiros.AsNoTracking()
             .Where(f => f.Tipo == TipoLancamento.Entrada && f.DataLancamento >= de && f.DataLancamento <= ate
-                && (f.AgendamentoId != null || f.ReceberId != null))
+                && (f.AgendamentoId != null || f.ReceberId != null)
+                && !contexto.Financeiros.Any(e => e.LancamentoEstornadoId == f.Id))
             .Select(f => new
             {
                 ClienteId = f.AgendamentoId != null ? f.Agendamento!.ClienteId : f.Receber!.Agendamento!.ClienteId,

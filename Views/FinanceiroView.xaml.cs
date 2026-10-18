@@ -121,9 +121,11 @@ namespace EspacoFestas.Views
             decimal Faturado(DateTime de, DateTime ate) => contexto.Agendamentos
                 .Where(a => a.Status == StatusAgendamento.Faturado && a.DataEvento >= de && a.DataEvento <= ate)
                 .Sum(a => (decimal?)a.ValorTotal) ?? 0;
+            // Recebido = entradas menos estornos (baixa ou sinal estornado não foi recebido de fato); suprimento não é receita
             decimal Recebido(DateTime de, DateTime ate) => contexto.Financeiros
-                .Where(f => f.Tipo == TipoLancamento.Entrada && f.DataLancamento >= de && f.DataLancamento <= ate)
-                .Sum(f => (decimal?)f.Valor) ?? 0;
+                .Where(f => (f.Tipo == TipoLancamento.Entrada || f.LancamentoEstornadoId != null) && !f.MovimentacaoCaixa
+                    && f.DataLancamento >= de && f.DataLancamento <= ate)
+                .Sum(f => (decimal?)(f.Tipo == TipoLancamento.Entrada ? f.Valor : -f.Valor)) ?? 0;
 
             decimal faturado = Faturado(inicio, fim);
             decimal recebido = Recebido(inicio, fim);
@@ -355,6 +357,7 @@ namespace EspacoFestas.Views
                 .Select(r => new ParcelaLinha(
                     r.Id,
                     r.Status == StatusReceber.Aberto,
+                    r.Status == StatusReceber.Pago,
                     Formatos.Data(r.DataVencimento),
                     r.Cliente,
                     $"{r.Evento} · {Formatos.Data(r.DataEvento)}",
@@ -380,6 +383,9 @@ namespace EspacoFestas.Views
             bool aberta = GradeReceber.SelectedItem is ParcelaLinha { Aberta: true };
             BtnBaixa.IsEnabled = aberta;
             BtnBaixa.ToolTip = aberta ? "Receber a parcela selecionada" : "Selecione uma parcela em aberto";
+            bool paga = GradeReceber.SelectedItem is ParcelaLinha { Paga: true };
+            BtnEstornarParcela.IsEnabled = paga;
+            BtnEstornarParcela.ToolTip = paga ? "Desfazer a baixa feita por engano" : "Selecione uma parcela paga";
         }
 
         private void GradeReceber_SelectionChanged(object sender, SelectionChangedEventArgs e) => AtualizarBotaoBaixa();
@@ -410,6 +416,48 @@ namespace EspacoFestas.Views
             }
         }
 
+        /// <summary>RN21: desfaz a baixa da parcela selecionada, depois de confirmar.</summary>
+        private void BtnEstornarParcela_Click(object sender, RoutedEventArgs e)
+        {
+            if (GradeReceber.SelectedItem is not ParcelaLinha { Paga: true } linha)
+            {
+                return;
+            }
+
+            if (!Dialogo.Confirmar("Estornar baixa",
+                    $"A parcela {linha.Parcela} de {linha.Cliente} volta a ficar em aberto, e o valor recebido sai do caixa. " +
+                    "Se a baixa gerou parcela com a diferença, ela é cancelada.", "Estornar", perigo: true))
+            {
+                return;
+            }
+
+            if (Executar(() => FinanceiroService.EstornarBaixa(linha.Id)))
+            {
+                CarregarReceber();
+            }
+        }
+
+        /// <summary>Roda o estorno; regra violada vira aviso. Devolve verdadeiro se gravou.</summary>
+        private static bool Executar(Action estorno)
+        {
+            try
+            {
+                System.Windows.Input.Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+                estorno();
+                return true;
+            }
+            catch (RegraNegocioException ex)
+            {
+                System.Windows.Input.Mouse.OverrideCursor = null;
+                Dialogo.Avisar("Estorno não feito", ex.Message);
+                return false;
+            }
+            finally
+            {
+                System.Windows.Input.Mouse.OverrideCursor = null;
+            }
+        }
+
         // ------------------------------------------------------------------
         // Caixa
         // ------------------------------------------------------------------
@@ -423,10 +471,13 @@ namespace EspacoFestas.Views
                 .OrderByDescending(f => f.DataLancamento).ThenByDescending(f => f.Id)
                 .Select(f => new
                 {
+                    f.Id,
                     f.DataLancamento,
                     f.Descricao,
                     f.Valor,
                     f.Tipo,
+                    Estornado = contexto.Financeiros.Any(e => e.LancamentoEstornadoId == f.Id),
+                    f.MovimentacaoCaixa,
                     Especie = f.Especie!.Descricao,
                     Agendamento = f.Agendamento != null ? f.Agendamento.Titulo : null,
                     Parcela = f.Receber != null ? (short?)f.Receber.NumeroParcela : null,
@@ -441,10 +492,13 @@ namespace EspacoFestas.Views
             TxtSaldo.Text = Formatos.Moeda(entradas - saidas);
 
             var linhas = lancamentos.Select(l => new LancamentoLinha(
+                l.Id,
+                l.Tipo == TipoLancamento.Entrada && !l.Estornado && !l.MovimentacaoCaixa,
                 Formatos.Data(l.DataLancamento),
-                l.Descricao ?? (l.Tipo == TipoLancamento.Entrada ? "Entrada" : "Saída"),
+                (l.Descricao ?? (l.Tipo == TipoLancamento.Entrada ? "Entrada" : "Saída")) + (l.Estornado ? " (estornado)" : string.Empty),
                 l.Parcela is not null ? $"Parcela {l.Parcela} · {l.AgendamentoParcela}"
                     : l.Agendamento is not null ? $"Agendamento · {l.Agendamento}"
+                    : l.MovimentacaoCaixa ? (l.Tipo == TipoLancamento.Entrada ? "Suprimento" : "Sangria")
                     : "Avulso",
                 l.Especie,
                 (l.Tipo == TipoLancamento.Entrada ? "+ " : "− ") + Formatos.Moeda(l.Valor),
@@ -453,6 +507,48 @@ namespace EspacoFestas.Views
             GradeCaixa.ItemsSource = linhas;
             VazioCaixa.Visibility = linhas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             GradeCaixa.Visibility = linhas.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+            AtualizarBotaoEstorno();
+        }
+
+        private void AtualizarBotaoEstorno()
+        {
+            bool estornavel = GradeCaixa.SelectedItem is LancamentoLinha { Estornavel: true };
+            BtnEstornarLancamento.IsEnabled = estornavel;
+            BtnEstornarLancamento.ToolTip = estornavel ? "Desfazer o lançamento feito por engano" : "Selecione uma entrada ainda não estornada";
+        }
+
+        private void GradeCaixa_SelectionChanged(object sender, SelectionChangedEventArgs e) => AtualizarBotaoEstorno();
+
+        /// <summary>RF15/RF12: lançamento avulso ou despesa do evento.</summary>
+        private void BtnNovoLancamento_Click(object sender, RoutedEventArgs e)
+        {
+            var janela = new LancamentoWindow();
+            MainWindow.Atual.MostrarModal(janela);
+            if (janela.Lancou)
+            {
+                CarregarCaixa();
+            }
+        }
+
+        /// <summary>RN21/RN26: estorna a entrada selecionada (sinal, recebimento de parcela ou avulsa), depois de confirmar.</summary>
+        private void BtnEstornarLancamento_Click(object sender, RoutedEventArgs e)
+        {
+            if (GradeCaixa.SelectedItem is not LancamentoLinha { Estornavel: true } linha)
+            {
+                return;
+            }
+
+            if (!Dialogo.Confirmar("Estornar lançamento",
+                    $"\"{linha.Descricao}\" ({linha.Valor}) será desfeito com uma saída no caixa. Se for recebimento de parcela, ela volta a ficar em aberto.",
+                    "Estornar", perigo: true))
+            {
+                return;
+            }
+
+            if (Executar(() => FinanceiroService.Estornar(linha.Id)))
+            {
+                CarregarCaixa();
+            }
         }
 
         private void Aba_Click(object sender, RoutedEventArgs e) =>
@@ -462,9 +558,10 @@ namespace EspacoFestas.Views
 
         private void CmbPeriodo_SelectionChanged(object sender, SelectionChangedEventArgs e) => Atualizar();
 
-        public sealed record ParcelaLinha(int Id, bool Aberta, string Vencimento, string Cliente, string Evento, string Parcela, string Especie,
+        public sealed record ParcelaLinha(int Id, bool Aberta, bool Paga, string Vencimento, string Cliente, string Evento, string Parcela, string Especie,
             string Valor, string Status);
 
-        public sealed record LancamentoLinha(string Data, string Descricao, string Origem, string Especie, string Valor, bool Entrada);
+        /// <param name="Estornavel">Entrada (sinal, recebimento de parcela ou avulsa) que ainda não foi estornada; suprimento não.</param>
+        public sealed record LancamentoLinha(long Id, bool Estornavel, string Data, string Descricao, string Origem, string Especie, string Valor, bool Entrada);
     }
 }

@@ -7,10 +7,13 @@
 -- relativo à pasta Arquivos\ do sistema); tema padrão claro.
 -- Revisão de 04/10/2026: tamanhos dos VARCHAR fechados (ajustes v2, seção 4) e
 -- CLIENTE.TELEFONE só com dígitos (VARCHAR(11)).
+-- Revisão de 18/10/2026: FINANCEIRO.LANCAMENTO_ESTORNADO_ID (estorno e devolução apontam para a entrada),
+-- FINANCEIRO.MOVIMENTACAO_CAIXA (suprimento e sangria) e WhatsApp (WHATSAPP_MENSAGEM, MODELO_MENSAGEM,
+-- CONFIGURACAO.WHATSAPP_*, CLIENTE.ACEITA_WHATSAPP).
 --
 -- Só estrutura (domínios, tabelas, COMMENT ON). Dados iniciais: dados-iniciais.sql.
 -- Banco já criado com versões anteriores: rodar alteracoes-2026-09-29.sql,
--- alteracoes-2026-09-30.sql e alteracoes-2026-10-04.sql, na ordem (só as que faltam).
+-- alteracoes-2026-09-30.sql, alteracoes-2026-10-04.sql e alteracoes-2026-10-18.sql, na ordem (só as que faltam).
 -- ============================================================================
 
 -- ============================================================================
@@ -26,6 +29,8 @@ CREATE DOMAIN D_TIPO_LANCAMENTO    AS CHAR(1) NOT NULL CHECK (VALUE IN ('E','S')
 CREATE DOMAIN D_TEMA               AS CHAR(1) DEFAULT 'C' NOT NULL CHECK (VALUE IN ('E','C','S'));
 CREATE DOMAIN D_UF                 AS CHAR(2);
 CREATE DOMAIN D_CAMINHO_ARQUIVO    AS VARCHAR(260);
+CREATE DOMAIN D_TIPO_MENSAGEM      AS CHAR(1) NOT NULL CHECK (VALUE IN ('C','O','L','P','A'));
+CREATE DOMAIN D_STATUS_MENSAGEM    AS CHAR(1) NOT NULL CHECK (VALUE IN ('P','E','F','C'));
 
 COMMENT ON DOMAIN D_VALOR IS 'Valor monetário em reais.';
 COMMENT ON DOMAIN D_PERCENTUAL IS 'Percentual (ex.: 2.00 = 2%).';
@@ -36,6 +41,8 @@ COMMENT ON DOMAIN D_TIPO_LANCAMENTO IS 'E=Entrada, S=Saída.';
 COMMENT ON DOMAIN D_TEMA IS 'E=Escuro, C=Claro (padrão), S=Seguir o Windows.';
 COMMENT ON DOMAIN D_UF IS 'Sigla do estado (ex.: SC).';
 COMMENT ON DOMAIN D_CAMINHO_ARQUIVO IS 'Caminho de arquivo relativo à pasta Arquivos\ do sistema (ex.: Empresa\logo.png). O arquivo fica fora do banco.';
+COMMENT ON DOMAIN D_TIPO_MENSAGEM IS 'C=Catálogo, O=Orçamento/agendamento, L=Lembrete de evento, P=Cobrança de parcela, A=Avulsa.';
+COMMENT ON DOMAIN D_STATUS_MENSAGEM IS 'P=Pendente, E=Enviada, F=Falha, C=Cancelada.';
 
 -- ============================================================================
 -- CADASTROS
@@ -55,9 +62,11 @@ CREATE TABLE CLIENTE (
     UF              D_UF,
     CEP             CHAR(8),
     DATA_CADASTRO   DATE DEFAULT CURRENT_DATE NOT NULL,
-    ATIVO           D_ATIVO
+    ATIVO           D_ATIVO,
+    ACEITA_WHATSAPP BOOLEAN DEFAULT TRUE NOT NULL
 );
 COMMENT ON TABLE CLIENTE IS 'Quem contrata o evento, pessoa física ou jurídica.';
+COMMENT ON COLUMN CLIENTE.ACEITA_WHATSAPP IS 'Consentimento para receber mensagens pelo WhatsApp (LGPD). Desmarcado, o sistema não envia.';
 COMMENT ON COLUMN CLIENTE.CPF_CNPJ IS 'Opcional; só dígitos (11 = CPF, 14 = CNPJ); se preenchido, único e válido (RN01).';
 COMMENT ON COLUMN CLIENTE.TELEFONE IS 'Obrigatório; só dígitos, com DDD (10 ou 11). A máscara é só da tela.';
 COMMENT ON COLUMN CLIENTE.EMAIL IS 'Opcional.';
@@ -243,20 +252,31 @@ CREATE TABLE FINANCEIRO (
     RECEBER_ID          INTEGER,
     AGENDAMENTO_ID      INTEGER,
     DESCRICAO           VARCHAR(200),
+    LANCAMENTO_ESTORNADO_ID BIGINT,
+    MOVIMENTACAO_CAIXA  BOOLEAN DEFAULT FALSE NOT NULL,
     CONSTRAINT FK_FINANCEIRO_RECEBER FOREIGN KEY (RECEBER_ID) REFERENCES RECEBER (ID),
     CONSTRAINT FK_FINANCEIRO_AGENDAMENTO FOREIGN KEY (AGENDAMENTO_ID) REFERENCES AGENDAMENTO (ID),
-    CONSTRAINT FK_FINANCEIRO_ESPECIE FOREIGN KEY (ESPECIE_ID) REFERENCES ESPECIE (ID)
+    CONSTRAINT FK_FINANCEIRO_ESPECIE FOREIGN KEY (ESPECIE_ID) REFERENCES ESPECIE (ID),
+    CONSTRAINT FK_FINANCEIRO_ESTORNADO FOREIGN KEY (LANCAMENTO_ESTORNADO_ID) REFERENCES FINANCEIRO (ID)
 );
 COMMENT ON TABLE FINANCEIRO IS 'O que entrou ou saiu de fato ("caixa"). No máximo uma de RECEBER_ID/AGENDAMENTO_ID preenchida.';
 COMMENT ON COLUMN FINANCEIRO.TIPO IS 'E=Entrada, S=Saída.';
 COMMENT ON COLUMN FINANCEIRO.RECEBER_ID IS 'Preenchido em baixa de parcela ou estorno de baixa.';
 COMMENT ON COLUMN FINANCEIRO.AGENDAMENTO_ID IS 'Preenchido em pagamento à vista, sinal, despesa do evento, devolução ou estorno de à vista/sinal.';
 COMMENT ON COLUMN FINANCEIRO.ESPECIE_ID IS 'Espécie real, o que aconteceu de fato (pode diferir da combinada em RECEBER).';
+COMMENT ON COLUMN FINANCEIRO.LANCAMENTO_ESTORNADO_ID IS 'Só em saída de estorno ou devolução: a entrada desfeita (baixa de parcela, sinal, entrada avulsa). Uma entrada só pode ser estornada ou devolvida uma vez (RN21, RN24, RN26).';
+
+COMMENT ON COLUMN FINANCEIRO.MOVIMENTACAO_CAIXA IS 'Suprimento (entrada) ou sangria (saída): dinheiro que só entra ou sai do caixa, sem ser receita nem despesa. Sempre avulso (RN34).';
 
 CREATE INDEX IX_FINANCEIRO_DATA_LANCAMENTO ON FINANCEIRO (DATA_LANCAMENTO);
+CREATE UNIQUE INDEX UX_FINANCEIRO_ESTORNADO ON FINANCEIRO (LANCAMENTO_ESTORNADO_ID);
 
 ALTER TABLE FINANCEIRO ADD CONSTRAINT CK_FINANCEIRO_ORIGEM
   CHECK (RECEBER_ID IS NULL OR AGENDAMENTO_ID IS NULL);
+ALTER TABLE FINANCEIRO ADD CONSTRAINT CK_FINANCEIRO_ESTORNO
+  CHECK (LANCAMENTO_ESTORNADO_ID IS NULL OR TIPO = 'S');
+ALTER TABLE FINANCEIRO ADD CONSTRAINT CK_FINANCEIRO_MOVIMENTACAO
+  CHECK (MOVIMENTACAO_CAIXA = FALSE OR (RECEBER_ID IS NULL AND AGENDAMENTO_ID IS NULL AND LANCAMENTO_ESTORNADO_ID IS NULL));
 
 -- ============================================================================
 -- CONFIGURAÇÃO
@@ -274,7 +294,9 @@ CREATE TABLE CONFIGURACAO (
     TELEFONE_EMPRESA            VARCHAR(20),
     EMAIL_EMPRESA               VARCHAR(120),
     ENDERECO_EMPRESA            VARCHAR(200),
-    CAMINHO_LOGO_EMPRESA        D_CAMINHO_ARQUIVO
+    CAMINHO_LOGO_EMPRESA        D_CAMINHO_ARQUIVO,
+    WHATSAPP_ATIVO              BOOLEAN DEFAULT FALSE NOT NULL,
+    WHATSAPP_LIMITE_DIARIO      SMALLINT DEFAULT 10 NOT NULL
 );
 COMMENT ON TABLE CONFIGURACAO IS 'Parâmetros de negócio, dados da empresa e tema. Tabela de uma linha só (ID=1).';
 COMMENT ON COLUMN CONFIGURACAO.BLOQUEIO_UM_POR_DIA IS 'Se verdadeiro, cada serviço só pode estar em um agendamento por dia (RN10).';
@@ -287,6 +309,133 @@ COMMENT ON COLUMN CONFIGURACAO.CNPJ_EMPRESA IS 'Só dígitos.';
 COMMENT ON COLUMN CONFIGURACAO.ENDERECO_EMPRESA IS 'Texto livre, uma linha; só é exibido.';
 COMMENT ON COLUMN CONFIGURACAO.CAMINHO_LOGO_EMPRESA IS 'Logo da empresa: caminho relativo à pasta Arquivos\ (ex.: Empresa\logo_20260930142501.png). Opcional; sem logo ou arquivo sumido, a interface mostra só o nome.';
 
+COMMENT ON COLUMN CONFIGURACAO.WHATSAPP_ATIVO IS 'Liga o envio pelo WhatsApp (servidor local em Whatsapp\). Desligado, o sistema funciona igual, sem WhatsApp (RN30).';
+COMMENT ON COLUMN CONFIGURACAO.WHATSAPP_LIMITE_DIARIO IS 'Máximo de mensagens enviadas por dia (RN29). Padrão 10, para reduzir o risco de bloqueio do número.';
+
 ALTER TABLE CONFIGURACAO ADD CONSTRAINT CK_CONFIGURACAO_UNICA CHECK (ID = 1);
+ALTER TABLE CONFIGURACAO ADD CONSTRAINT CK_CONFIGURACAO_LIMITE_WHATSAPP CHECK (WHATSAPP_LIMITE_DIARIO > 0);
+
+-- ============================================================================
+-- WHATSAPP
+-- ============================================================================
+
+CREATE TABLE WHATSAPP_MENSAGEM (
+    ID                  INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    CLIENTE_ID          INTEGER,
+    AGENDAMENTO_ID      INTEGER,
+    RECEBER_ID          INTEGER,
+    TELEFONE            VARCHAR(13) NOT NULL,
+    TIPO                D_TIPO_MENSAGEM,
+    TEXTO               VARCHAR(2000) NOT NULL,
+    CAMINHO_ANEXO       D_CAMINHO_ARQUIVO,
+    STATUS              D_STATUS_MENSAGEM,
+    DATA_CRIACAO        TIMESTAMP NOT NULL,
+    DATA_ENVIO          TIMESTAMP,
+    TENTATIVAS          SMALLINT DEFAULT 0 NOT NULL,
+    MENSAGEM_ERRO       VARCHAR(500),
+    CONSTRAINT FK_WHATSAPP_MENSAGEM_CLIENTE FOREIGN KEY (CLIENTE_ID) REFERENCES CLIENTE (ID),
+    CONSTRAINT FK_WHATSAPP_MENSAGEM_AGENDAMENTO FOREIGN KEY (AGENDAMENTO_ID) REFERENCES AGENDAMENTO (ID),
+    CONSTRAINT FK_WHATSAPP_MENSAGEM_RECEBER FOREIGN KEY (RECEBER_ID) REFERENCES RECEBER (ID)
+);
+COMMENT ON TABLE WHATSAPP_MENSAGEM IS 'Fila e histórico das mensagens de WhatsApp. Nada é apagado; falha pode ser reenviada.';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.TELEFONE IS 'Só dígitos, com 55 e DDD (como foi enviado).';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.TIPO IS 'C=Catálogo, O=Orçamento/agendamento, L=Lembrete de evento, P=Cobrança de parcela, A=Avulsa.';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.TEXTO IS 'Texto enviado (ou legenda do anexo), já com as variáveis preenchidas.';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.CAMINHO_ANEXO IS 'PDF enviado, relativo à pasta Arquivos\ (ex.: WhatsApp\catalogo_20261018143000.pdf).';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.STATUS IS 'P=Pendente, E=Enviada, F=Falha, C=Cancelada.';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.DATA_ENVIO IS 'Quando o WhatsApp aceitou a mensagem. Conta para o limite diário (RN29).';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.TENTATIVAS IS 'Quantas vezes o envio foi tentado.';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.MENSAGEM_ERRO IS 'Motivo da última falha (ex.: número sem WhatsApp).';
+
+CREATE INDEX IX_WHATSAPP_MENSAGEM_STATUS ON WHATSAPP_MENSAGEM (STATUS, DATA_CRIACAO);
+CREATE INDEX IX_WHATSAPP_MENSAGEM_ENVIO ON WHATSAPP_MENSAGEM (DATA_ENVIO);
+
+CREATE TABLE MODELO_MENSAGEM (
+    ID                  INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    TIPO                D_TIPO_MENSAGEM,
+    TITULO              VARCHAR(80) NOT NULL,
+    TEXTO               VARCHAR(2000) NOT NULL,
+    ATIVO               D_ATIVO
+);
+COMMENT ON TABLE MODELO_MENSAGEM IS 'Textos das mensagens de WhatsApp, editáveis em Configurações. Um por tipo.';
+COMMENT ON COLUMN MODELO_MENSAGEM.TEXTO IS 'Com variáveis entre chaves: {cliente}, {titulo}, {status}, {data}, {hora}, {servicos}, {valor}, {pago}, {saldo}, {empresa}, {telefone_empresa}.';
+
+CREATE UNIQUE INDEX UX_MODELO_MENSAGEM_TIPO ON MODELO_MENSAGEM (TIPO);
+
+
+-- ============================================================================
+-- COMENTÁRIOS DOS CAMPOS RESTANTES (chaves, nomes e datas)
+-- ============================================================================
+
+COMMENT ON COLUMN CLIENTE.ID IS 'Identificador.';
+COMMENT ON COLUMN CLIENTE.NOME IS 'Nome da pessoa ou razão social.';
+COMMENT ON COLUMN CLIENTE.NUMERO IS 'Endereço opcional: número.';
+COMMENT ON COLUMN CLIENTE.COMPLEMENTO IS 'Endereço opcional: complemento.';
+COMMENT ON COLUMN CLIENTE.BAIRRO IS 'Endereço opcional: bairro.';
+COMMENT ON COLUMN CLIENTE.CIDADE IS 'Endereço opcional: cidade.';
+COMMENT ON COLUMN CLIENTE.UF IS 'Endereço opcional: sigla do estado.';
+COMMENT ON COLUMN CLIENTE.DATA_CADASTRO IS 'Quando o cliente foi cadastrado.';
+
+COMMENT ON COLUMN SERVICO.ID IS 'Identificador.';
+COMMENT ON COLUMN SERVICO.NOME IS 'Nome do serviço (ex.: Salão principal).';
+COMMENT ON COLUMN SERVICO.DESCRICAO IS 'Descrição opcional, sai no catálogo.';
+
+COMMENT ON COLUMN SERVICO_FAIXA.ID IS 'Identificador.';
+COMMENT ON COLUMN SERVICO_FAIXA.SERVICO_ID IS 'Serviço da faixa.';
+COMMENT ON COLUMN SERVICO_FAIXA.NOME IS 'Nome da faixa (ex.: Até 100 pessoas).';
+COMMENT ON COLUMN SERVICO_FAIXA.VALOR IS 'Preço atual da faixa; copiado para o agendamento no lançamento (RN08).';
+
+COMMENT ON COLUMN ADICIONAL.ID IS 'Identificador.';
+COMMENT ON COLUMN ADICIONAL.NOME IS 'Nome do adicional (ex.: Docinhos).';
+COMMENT ON COLUMN ADICIONAL.DESCRICAO IS 'Descrição opcional, sai no catálogo.';
+COMMENT ON COLUMN ADICIONAL.ATIVO IS 'Adicional usado não é excluído, é inativado.';
+
+COMMENT ON COLUMN SERVICO_ADICIONAL.SERVICO_ID IS 'Serviço que oferece o adicional.';
+COMMENT ON COLUMN SERVICO_ADICIONAL.ADICIONAL_ID IS 'Adicional oferecido no serviço.';
+
+COMMENT ON COLUMN ESPECIE.ID IS 'Identificador.';
+COMMENT ON COLUMN ESPECIE.DESCRICAO IS 'Forma de pagamento (ex.: Pix, Cartão de crédito).';
+
+COMMENT ON COLUMN AGENDAMENTO.ID IS 'Identificador.';
+COMMENT ON COLUMN AGENDAMENTO.CLIENTE_ID IS 'Cliente que contrata o evento.';
+COMMENT ON COLUMN AGENDAMENTO.DATA_EVENTO IS 'Dia em que o evento começa; vale para a disponibilidade (RN28).';
+COMMENT ON COLUMN AGENDAMENTO.QUANTIDADE_CONVIDADOS IS 'Opcional.';
+COMMENT ON COLUMN AGENDAMENTO.OBSERVACAO IS 'Texto livre opcional.';
+COMMENT ON COLUMN AGENDAMENTO.DATA_CADASTRO IS 'Quando o agendamento foi criado.';
+
+COMMENT ON COLUMN SERVICO_AGENDAMENTO.ID IS 'Identificador.';
+COMMENT ON COLUMN SERVICO_AGENDAMENTO.AGENDAMENTO_ID IS 'Agendamento do item.';
+COMMENT ON COLUMN SERVICO_AGENDAMENTO.SERVICO_ID IS 'Serviço contratado.';
+
+COMMENT ON COLUMN ADICIONAL_AGENDAMENTO.ID IS 'Identificador.';
+COMMENT ON COLUMN ADICIONAL_AGENDAMENTO.AGENDAMENTO_ID IS 'Agendamento do item.';
+COMMENT ON COLUMN ADICIONAL_AGENDAMENTO.ADICIONAL_ID IS 'Adicional contratado.';
+
+COMMENT ON COLUMN RECEBER.ID IS 'Identificador.';
+COMMENT ON COLUMN RECEBER.AGENDAMENTO_ID IS 'Agendamento faturado que gerou a parcela.';
+COMMENT ON COLUMN RECEBER.NUMERO_PARCELA IS 'Número da parcela (1, 2, 3...); a parcela de diferença continua a sequência.';
+COMMENT ON COLUMN RECEBER.VALOR_PARCELA IS 'Valor original da parcela, sem multa nem juros.';
+COMMENT ON COLUMN RECEBER.DATA_VENCIMENTO IS 'Vencimento da parcela.';
+COMMENT ON COLUMN RECEBER.DATA_RECEBIMENTO IS 'Preenchido na baixa; limpo no estorno (RN21).';
+
+COMMENT ON COLUMN FINANCEIRO.ID IS 'Identificador.';
+COMMENT ON COLUMN FINANCEIRO.DATA_LANCAMENTO IS 'Dia em que o dinheiro entrou ou saiu.';
+COMMENT ON COLUMN FINANCEIRO.VALOR IS 'Valor do lançamento (sempre positivo; o sentido está em TIPO).';
+COMMENT ON COLUMN FINANCEIRO.DESCRICAO IS 'Texto do lançamento (ex.: Sinal – Aniversário da Ana).';
+
+COMMENT ON COLUMN CONFIGURACAO.ID IS 'Sempre 1 (tabela de uma linha só).';
+COMMENT ON COLUMN CONFIGURACAO.TELEFONE_EMPRESA IS 'Só dígitos; aparece no catálogo e nas mensagens.';
+COMMENT ON COLUMN CONFIGURACAO.EMAIL_EMPRESA IS 'Aparece no catálogo.';
+
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.ID IS 'Identificador.';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.CLIENTE_ID IS 'Cliente que recebeu (opcional).';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.AGENDAMENTO_ID IS 'Agendamento do resumo enviado (opcional).';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.RECEBER_ID IS 'Parcela cobrada (opcional; para a cobrança pelo WhatsApp).';
+COMMENT ON COLUMN WHATSAPP_MENSAGEM.DATA_CRIACAO IS 'Quando a mensagem foi registrada.';
+
+COMMENT ON COLUMN MODELO_MENSAGEM.ID IS 'Identificador.';
+COMMENT ON COLUMN MODELO_MENSAGEM.TIPO IS 'Tipo da mensagem; um modelo por tipo.';
+COMMENT ON COLUMN MODELO_MENSAGEM.TITULO IS 'Nome do modelo na tela.';
+COMMENT ON COLUMN MODELO_MENSAGEM.ATIVO IS 'Inativo: o sistema usa o texto padrão.';
 
 COMMIT;

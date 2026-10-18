@@ -1,0 +1,87 @@
+<Window x:Class="EspacoFestas.Views.LancamentoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:EspacoFestas.Controls"
+        Title="Lançamento no caixa" Width="560" Height="600"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        FontFamily="{StaticResource FonteInter}" FontSize="14" Foreground="{DynamicResource CorTexto}"
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <!-- Lançamento feito à mão no caixa (RF15): avulso (entrada ou saída) ou despesa do evento (RF12, saída ligada ao agendamento). -->
+    <Border Background="{DynamicResource CorSuperficie}" BorderBrush="{DynamicResource CorBorda}" BorderThickness="1" CornerRadius="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,0,0,1" Background="Transparent"
+                    MouseLeftButtonDown="Cabecalho_MouseLeftButtonDown">
+                <DockPanel Margin="24,20,16,16">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeFechar}"
+                            VerticalAlignment="Top" ToolTip="Fechar (Esc)" Click="BtnCancelar_Click"/>
+                    <StackPanel>
+                        <TextBlock Text="Lançamento no caixa" Style="{StaticResource TextoTituloSecao}" FontSize="20"/>
+                        <TextBlock Text="Despesa do evento, compra de material, suprimento ou sangria" Style="{StaticResource TextoAuxiliar}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,0,24,8">
+                <StackPanel Margin="0,16,0,0">
+                    <TextBlock Text="Tipo *" Style="{StaticResource TextoRotulo}"/>
+                    <WrapPanel>
+                        <RadioButton x:Name="OpcaoSaida" Style="{StaticResource OpcaoRadio}" GroupName="Tipo" Content="Saída" IsChecked="True" Checked="Tipo_Checked"/>
+                        <RadioButton x:Name="OpcaoEntrada" Style="{StaticResource OpcaoRadio}" GroupName="Tipo" Content="Entrada" Checked="Tipo_Checked"/>
+                        <RadioButton x:Name="OpcaoSuprimento" Style="{StaticResource OpcaoRadio}" GroupName="Tipo" Content="Suprimento" Checked="Tipo_Checked"
+                                     ToolTip="Dinheiro colocado no caixa (ex.: troco). Não é receita."/>
+                        <RadioButton x:Name="OpcaoSangria" Style="{StaticResource OpcaoRadio}" GroupName="Tipo" Content="Sangria" Checked="Tipo_Checked"
+                                     ToolTip="Dinheiro retirado do caixa (ex.: depósito no banco). Não é despesa."/>
+                    </WrapPanel>
+
+                    <TextBlock Text="Despesa do evento" Style="{StaticResource TextoRotulo}" Margin="0,16,0,0"/>
+                    <ComboBox x:Name="CmbAgendamento" SelectionChanged="Campo_Changed"/>
+                    <TextBlock x:Name="TxtAjudaAgendamento" Style="{StaticResource TextoAuxiliar}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="Escolha o evento para a saída entrar no lucro dele. Sem evento, o lançamento é avulso."/>
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Data *" Style="{StaticResource TextoRotulo}"/>
+                            <Grid x:Name="CaixaData">
+                                <TextBox x:Name="TxtData" Tag="dd/mm/aaaa" ctl:Mascara.Tipo="Data" Padding="12,0,36,0" TextChanged="Campo_Changed"/>
+                                <Button Style="{StaticResource BotaoIcone}" ctl:Estilo.Icone="{StaticResource IconeAgenda}" HorizontalAlignment="Right"
+                                        Margin="0,0,4,0" Focusable="False" ToolTip="Escolher no calendário" Click="BtnCalendario_Click"/>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Valor (R$) *" Style="{StaticResource TextoRotulo}"/>
+                            <TextBox x:Name="TxtValor" Style="{StaticResource CampoValor}" ctl:Mascara.Tipo="Moeda" Tag="0,00" TextChanged="Campo_Changed"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Espécie *" Style="{StaticResource TextoRotulo}" Margin="0,16,0,0"/>
+                    <ComboBox x:Name="CmbEspecie" SelectionChanged="Campo_Changed"/>
+
+                    <TextBlock Text="Descrição *" Style="{StaticResource TextoRotulo}" Margin="0,16,0,0"/>
+                    <TextBox x:Name="TxtDescricao" MaxLength="200" Tag="Ex.: pagamento do garçom" TextChanged="Campo_Changed"/>
+
+                    <TextBlock x:Name="TxtErro" Style="{StaticResource TextoErro}" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border Grid.Row="2" BorderBrush="{DynamicResource CorBorda}" BorderThickness="0,1,0,0" Padding="24,16">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancelar" Style="{StaticResource BotaoFantasma}" Margin="0,0,8,0" Click="BtnCancelar_Click"/>
+                    <Button Content="Lançar" Style="{StaticResource BotaoPrincipal}" Click="BtnConfirmar_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

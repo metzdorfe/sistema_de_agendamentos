@@ -21,6 +21,8 @@ public class EspacoFestasContext : DbContext
     public DbSet<Receber> Recebers => Set<Receber>();
     public DbSet<Financeiro> Financeiros => Set<Financeiro>();
     public DbSet<Configuracao> Configuracoes => Set<Configuracao>();
+    public DbSet<WhatsappMensagem> WhatsappMensagens => Set<WhatsappMensagem>();
+    public DbSet<ModeloMensagem> ModelosMensagem => Set<ModeloMensagem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -108,6 +110,12 @@ public class EspacoFestasContext : DbContext
             .HasOne(f => f.Agendamento)
             .WithMany(a => a.Lancamentos)
             .HasForeignKey(f => f.AgendamentoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Financeiro>()
+            .HasOne(f => f.LancamentoEstornado)
+            .WithOne()
+            .HasForeignKey<Financeiro>(f => f.LancamentoEstornadoId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Financeiro>()
@@ -199,6 +207,32 @@ public class EspacoFestasContext : DbContext
 
         modelBuilder.Entity<Configuracao>()
             .Property(c => c.Id).ValueGeneratedNever();
+
+        modelBuilder.Entity<WhatsappMensagem>(m =>
+        {
+            m.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Restrict);
+            m.HasOne(x => x.Agendamento).WithMany().HasForeignKey(x => x.AgendamentoId).OnDelete(DeleteBehavior.Restrict);
+            m.HasOne(x => x.Receber).WithMany().HasForeignKey(x => x.ReceberId).OnDelete(DeleteBehavior.Restrict);
+            m.Property(x => x.Telefone).HasMaxLength(13);
+            m.Property(x => x.Texto).HasMaxLength(2000);
+            m.Property(x => x.CaminhoAnexo).HasMaxLength(260);
+            m.Property(x => x.MensagemErro).HasMaxLength(500);
+            m.Property(x => x.Tipo)
+                .HasConversion(v => Conversoes.TipoMensagemParaChar(v), v => Conversoes.CharParaTipoMensagem(v))
+                .HasColumnType("CHAR(1)");
+            m.Property(x => x.Status)
+                .HasConversion(v => Conversoes.StatusMensagemParaChar(v), v => Conversoes.CharParaStatusMensagem(v))
+                .HasColumnType("CHAR(1)");
+        });
+
+        modelBuilder.Entity<ModeloMensagem>(m =>
+        {
+            m.Property(x => x.Titulo).HasMaxLength(80);
+            m.Property(x => x.Texto).HasMaxLength(2000);
+            m.Property(x => x.Tipo)
+                .HasConversion(v => Conversoes.TipoMensagemParaChar(v), v => Conversoes.CharParaTipoMensagem(v))
+                .HasColumnType("CHAR(1)");
+        });
 
         // Convenção de nomes: PascalCase (C#) -> MAIÚSCULO_COM_UNDERSCORE (Firebird). Ver stack-projeto.md.
         // Usa o nome da classe (singular), não o nome do DbSet (plural), como base do nome da tabela.

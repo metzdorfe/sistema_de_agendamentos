@@ -15,7 +15,7 @@
     <AssemblyTitle>Fest Agenda</AssemblyTitle>
     <Company>Universidade do Contestado (UnC)</Company>
     <Copyright>© 2026 Acadêmicos da UnC</Copyright>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <!-- Publicação para o instalador: self-contained, DLLs soltas ao lado do .exe (sem PublishSingleFile).
@@ -26,6 +26,14 @@
     <PublishSingleFile>false</PublishSingleFile>
     <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <!-- Projeto de testes e servidor Node do WhatsApp ficam em subpastas: fora da compilação do sistema -->
+  <ItemGroup>
+    <Compile Remove="FestAgenda.Tests\**;Whatsapp\**" />
+    <None Remove="FestAgenda.Tests\**;Whatsapp\**" />
+    <EmbeddedResource Remove="FestAgenda.Tests\**;Whatsapp\**" />
+    <Page Remove="FestAgenda.Tests\**;Whatsapp\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include=".claude\modelagem-banco.md" />
@@ -70,6 +78,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.12" />
+    <PackageReference Include="QRCoder" Version="1.8.1" />
     <PackageReference Include="QuestPDF" Version="2026.9.1" />
   </ItemGroup>
 

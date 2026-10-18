@@ -49,11 +49,73 @@ namespace EspacoFestas
                 return;
             }
 
+            // Uma instância só: o banco embarcado fica preso ao primeiro processo, e a segunda janela só mostraria erro.
+            // Já aberto: traz a janela existente para a frente e sai.
+            _instancia = new Mutex(initiallyOwned: true, @"Local\FestAgenda.Instancia", out bool primeira);
+            if (!primeira)
+            {
+                TrazerInstanciaAberta();
+                Shutdown(0);
+                return;
+            }
+
             DispatcherUnhandledException += ErroNaoTratado;
+            TaskScheduler.UnobservedTaskException += (_, args) =>
+            {
+                ErroLog.Registrar(args.Exception, "Tarefa");
+                args.SetObserved();
+            };
+            AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+            {
+                if (args.ExceptionObject is Exception erro)
+                {
+                    ErroLog.Registrar(erro, "Fatal");
+                }
+            };
             TemaService.AcompanharWindows();
 
             new SplashWindow().Show();
         }
+
+        /// <summary>Encerra o servidor do WhatsApp junto (o Job Object garante isso mesmo se o app travar).</summary>
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Services.Whatsapp.WhatsappServidor.Atual.Parar();
+            _instancia?.Dispose();
+            base.OnExit(e);
+        }
+
+        /// <summary>Marca de "sistema aberto" (ver OnStartup); solta ao sair.</summary>
+        private static Mutex? _instancia;
+
+        private static void TrazerInstanciaAberta()
+        {
+            var atual = System.Diagnostics.Process.GetCurrentProcess();
+            var outra = System.Diagnostics.Process.GetProcessesByName(atual.ProcessName)
+                .FirstOrDefault(p => p.Id != atual.Id && p.MainWindowHandle != IntPtr.Zero);
+            if (outra is null)
+            {
+                return;
+            }
+
+            // Só restaura se estiver minimizada (restaurar uma janela maximizada a tiraria do maximizado)
+            const int Restaurar = 9;
+            if (IsIconic(outra.MainWindowHandle))
+            {
+                ShowWindow(outra.MainWindowHandle, Restaurar);
+            }
+
+            SetForegroundWindow(outra.MainWindowHandle);
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr janela);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr janela, int comando);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr janela);
 
         private static int AtualizarBancoSemJanela()
         {
@@ -197,10 +259,18 @@ namespace EspacoFestas
         private void ErroNaoTratado(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
+            if (e.Exception is RegraNegocioException regra)
+            {
+                // Regra violada que a tela não tratou: é aviso ao usuário, não defeito
+                Dialogo.Avisar("Não foi possível concluir", regra.Message);
+                return;
+            }
+
+            ErroLog.Registrar(e.Exception, "Interface");
             var mensagem = e.Exception is DbUpdateException { InnerException: { } interna }
                 ? interna.Message
                 : e.Exception.Message;
-            Dialogo.Avisar("Algo deu errado", mensagem);
+            Dialogo.Avisar("Algo deu errado", $"{mensagem}\n\nDetalhes gravados em Log\\{ErroLog.NomeArquivo}.");
         }
     }
 }

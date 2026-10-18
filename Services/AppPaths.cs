@@ -9,8 +9,9 @@ namespace EspacoFestas.Services;
 /// FestAgenda.exe, *.dll, config.ini
 /// BD\           banco (basefestagenda.fdb)
 /// Arquivos\     imagens e outros arquivos; o banco guarda só o caminho relativo a esta pasta
-/// Log\          RelatorioLog.log (uma linha por relatório gerado); preservada na desinstalação
+/// Log\          RelatorioLog.log, Erros.log, whatsapp.log; preservada na desinstalação
 /// Utilitarios\  ferramentas de manutenção (backup, restauração, isql)
+/// Whatsapp\     servidor local do WhatsApp (node\, server\) e a sessão (sessao\)
 /// </code>
 /// </summary>
 public static class AppPaths
@@ -29,6 +30,12 @@ public static class AppPaths
     public static string Log => Path.Combine(Raiz, "Log");
 
     public static string ConfigIni => Path.Combine(Raiz, NomeConfigIni);
+
+    /// <summary>Servidor do WhatsApp: node\ (Node portátil), server\ (código e node_modules) e sessao\ (login por QR).</summary>
+    public static string Whatsapp => Path.Combine(Raiz, "Whatsapp");
+
+    /// <summary>Sessão do WhatsApp; preservada na atualização e na desinstalação.</summary>
+    public static string WhatsappSessao => Path.Combine(Whatsapp, "sessao");
 
     /// <summary>Subpasta de Arquivos\ (ex.: "Empresa"), criada sob demanda.</summary>
     public static string PastaArquivos(string subpasta)
